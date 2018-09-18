@@ -1,0 +1,23 @@
+{
+  "name": "amazoncontrol",
+  "version": "1.0.0",
+  "description": "keywords for search team",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "give",
+    "search",
+    "keywords"
+  ],
+  "author": "xleox",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {}
+}
