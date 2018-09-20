@@ -14,7 +14,7 @@ exports.amazonLogin = function (username,password) {
     var options = new chrome.Options();
     options.addArguments("user-data-dir=D:\\Chrome\\User Data\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
-    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
+    driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.get('http://sellercentral.amazon.com/gp/homepage.html');
 
     return driver.wait(()=> {
@@ -32,7 +32,7 @@ exports.amazonLogin = function (username,password) {
                                 记住框:'//*[@id="authportal-main-section"]/div[2]/div/div/form/div/div/div/div[3]/div/div/label/div/label/input',
                                 登陆按钮:'//*[@id="signInSubmit"]',
                                 选择账户:'//*[@id="ap-account-switcher-container"]/div[1]/div/div/div[2]/div[1]/div[2]/a/div/div[2]/div/div/div[2]'};
-                    sleep.msleep(5*1000);
+                    sleep.msleep(1*1000); //实际用时延长
                     driver.findElements( By.xpath(xpaths.选择账户))
                         .then(doc => {if(doc.length != 0) driver.findElement(By.xpath(xpaths.选择账户)).click();});
 
@@ -63,7 +63,6 @@ exports.amazonLogin = function (username,password) {
                                         });
                         });
                     }
-
                 return driver.wait(()=> {
                     return driver.getTitle()
                         .then( title => {  //等待进入界面
@@ -71,18 +70,12 @@ exports.amazonLogin = function (username,password) {
                                 title.indexOf("两步") >= 0 || title.indexOf("two") >= 0 ) return title;
                             else return false;
                         } );}, 60*1000)
-
             });
     }
-    
-    function ElementExist (Locator) {
-        try
-        {
-            driver.findElement( Locator );
-            return true;
-        }
-        catch(ex)
-        {
-            return false;
-        }
-    }
+exports.getHomeInf = function () {
+    driver.findElement( By.xpath('//*[@id="sc-mkt-switcher-form"]/div'))
+        .getText().then(b=>{console.log("text",b)});
+}
+exports.quit=function () {
+    driver.quit();
+}
