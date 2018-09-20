@@ -2,13 +2,14 @@ var webdriver = require('selenium-webdriver'),
     By = webdriver.By,
     until = webdriver.until;
 var chrome = require('selenium-webdriver/chrome');
+var options;
+var driver;
 
 exports.amazonLogin = function (username,password) {
-    var o = new chrome.Options();
-    o.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
-//o.addArguments("user-data-dir=C:\\Users\\xleox\\AppData\\Local\\Google\\Chrome\\User Data\\");
-    var driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(o).build();
-
+    options = new chrome.Options();
+    options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
+    //o.addArguments("user-data-dir=C:\\Users\\xleox\\AppData\\Local\\Google\\Chrome\\User Data\\");
+    driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(o).build();
     driver.get('http://sellercentral.amazon.com/gp/homepage.html');
 
     driver.wait(()=> {
@@ -27,7 +28,7 @@ exports.amazonLogin = function (username,password) {
                     /*driver.wait(until.elementLocated(By.xpath('//!*[@id="ap_email"]')), 5000).then(()=>{console.log("用户名框")});
                     driver.wait(until.elementLocated(By.xpath('//!*[@id="ap_password"]')), 5000).then(()=>{console.log("密码框")});
                     driver.wait(until.elementLocated(By.xpath('//!*[@id="authportal-main-section"]/div[2]/div/div/form/div/div/div/div[3]/div/div/label/div/label/input')), 5000).then(()=>{console.log("记住框")});
-*/
+                    */
                 }
             });
-}
+    }
