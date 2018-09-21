@@ -5,17 +5,6 @@ const sleep = require('sleep');
 
 const severInf = [];
 
-let accountInf={
-    首页信息:{
-        名称:{xpath:"//*[@id=\"sc-mkt-switcher-form\"]/div",值:""},
-        国家:{xpath:"",值:""},
-        产品数量:{xpath:"//*[@id=\"agsBILWidget\"]/div[1]/div/table/tbody/tr[1]/td[1]/div/div/div/a",值:""},
-        订单数量:{xpath:"",值:""},
-        买家消息:{xpath:"",值:""},
-        退货请求:{xpath:"",值:""},
-    }
-};
-
 router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
 });
