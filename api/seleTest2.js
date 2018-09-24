@@ -4,6 +4,7 @@ const webdriver = require('selenium-webdriver'),
     until = webdriver.until;
 const chrome = require('selenium-webdriver/chrome');
 const Promise = require("bluebird");
+const moment = require("moment");
 let driver;
 
 let accountInf={
@@ -38,6 +39,11 @@ let accountInf={
     订单页面:{
         "数量":{xpath:'//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]',值:"-1"},
         "详情":[]
+    },
+    更新时间:{
+        首页信息:"",
+        首页面板:"",
+        订单页面:""
     }
 };
 
@@ -96,15 +102,20 @@ exports.amazonLogin = function (username,password) {
 exports.getHomeInf = function () {
     var keys=[];
     for(var key in accountInf.首页信息){
+        accountInf.首页信息[key]['值']='loading';
         keys.push(key);
     }
     Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页信息,item)});
+    accountInf.更新时间.首页信息=moment().format('YYYY-MM-DD HH:mm:ss');
 
     keys=[];
     for(var key in accountInf.首页面板){
+        accountInf.首页面板[key]['值']='loading';
         keys.push(key);
     }
     Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
+    accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');
+
     return new Promise(function(resolve, reject){resolve("获取首页信息完成");});
 }
 exports.getOderInf = function () {
@@ -135,6 +146,7 @@ exports.getOderInf = function () {
                                 accountInf.订单页面.数量.值=parseInt(orderNum);
                                 if(accountInf.订单页面.数量.值==0){
                                     accountInf.订单页面.详情=[];
+                                    accountInf.更新时间.订单页面=moment().format('YYYY-MM-DD HH:mm:ss');
                                 }else if(accountInf.订单页面.数量.值>0){
                                     var orderNum=[];
                                     for(var i=1;i<accountInf.订单页面.数量.值 && i<=50;i++){
@@ -156,6 +168,7 @@ exports.getOderInf = function () {
                                     }
                                     //console.log(JSON.stringify(accountInf.订单页面.详情));
                                     Promise.mapSeries(orderNum,tableTr=>{getTableByTr(tableTr)});
+                                    accountInf.更新时间.订单页面=moment().format('YYYY-MM-DD HH:mm:ss');
                                 }
                             }
                         });
@@ -203,6 +216,7 @@ getElementTextByXpath = function (xpath) {
 getTableByTr = function (trInt) {
     var keys=[];
     for(var key in accountInf.订单页面.详情[trInt]){
+        accountInf.订单页面.详情[trInt][key]['值']='loading';
         keys.push(key);
     }
     return Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.订单页面.详情[trInt],item)});
