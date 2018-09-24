@@ -8,6 +8,10 @@ const moment = require("moment");
 let driver;
 
 let accountInf={
+    版本:{
+        编号:"2.0.0.1",
+        名称:"月亮"
+    },
     首页信息:{
         名称:{xpath:'//*[@id="sc-mkt-switcher-form"]/div',值:""},
         等待中:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[1]/span[1]/span/a/div[1]/span',值:""},
