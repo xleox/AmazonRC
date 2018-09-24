@@ -22,7 +22,7 @@ var getBaseInf = function () {
         .catch(err => { console.log("登陆错误" , err); });
 };
 getBaseInf();
-setInterval(()=>{getBaseInf},300*1000)
+setInterval(()=>{getBaseInf()},300*1000)
 
 
 router.get('/test',(req,res) => {

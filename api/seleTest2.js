@@ -21,6 +21,8 @@ let accountInf={
         AtoZ:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[1]/span/a/div[1]/span',值:""},
         信用卡拒付:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[2]/span/a/div[1]/span',值:""},
         最近付款:{xpath:'//*[@id="fundTransferInfo"]/div/div[1]/div[2]/span/span/a/span',值:""},
+        通知:{xpath:'//*[@id="sc-snes-number"]',值:""},
+        其他通知:{xpath:'//*[@id="widget-glKEIi"]/div/div/p/strong',值:""},
         余额:{xpath:'//*[@id="seller-payments-widget"]/div[1]/div/div/div[2]/div/div/div/div[2]/span/span/a/span',值:""},
         今天销售额:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[1]/span',值:""},
         "7天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[1]/span',值:""},
@@ -176,7 +178,7 @@ exports.getOderInf = function () {
         })
 }
 exports.quit=function () {
-    driver.quit();
+    driver.close();
 }
 /**
  * 把数据写入到JSON里
