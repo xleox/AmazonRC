@@ -4,6 +4,7 @@ const webdriver = require('selenium-webdriver'),
     until = webdriver.until;
 const chrome = require('selenium-webdriver/chrome');
 const Promise = require("bluebird");
+let driver;
 
 let accountInf={
     首页信息:{
@@ -12,25 +13,38 @@ let accountInf={
         未发货先配送:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[1]/span[2]/span/a/div[1]/span',值:""},
         未发货:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[1]/span[3]/span/a/div[1]/span',值:""},
         退货请求:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[1]/span[4]/span/a/div[1]/span',值:""},
-        产品数量:{xpath:'//*[@id="agsBILWidget"]/div[1]/div/table/tbody/tr[1]/td[1]/div/div/div/a',值:""},
+        产品数量:{xpath:'//*[@id="lisitngCount"]',值:""},
         订单数量:{xpath:'//*[@id="OrderSummary"]/div/div[1]/div/div/div/div[2]',值:""},
         买家消息:{xpath:'//*[@id="bsm-record-metrics"]/span/span/a/div[1]/span',值:""},
+        超过24小时:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[3]/span[2]/span/a',值:""},
         AtoZ:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[1]/span/a/div[1]/span',值:""},
         信用卡拒付:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[2]/span/a/div[1]/span',值:""},
         最近付款:{xpath:'//*[@id="fundTransferInfo"]/div/div[1]/div[2]/span/span/a/span',值:""},
-        余额:{xpath:'//*[@id="seller-payments-widget"]/div[1]/div/div/div[2]/div/div/div/div[2]/span/span/a/span',值:""}
+        余额:{xpath:'//*[@id="seller-payments-widget"]/div[1]/div/div/div[2]/div/div/div/div[2]/span/span/a/span',值:""},
+        今天销售额:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[1]/span',值:""},
+        "7天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[1]/span',值:""},
+        "15天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[4]/td[1]/span',值:""},
+        "30天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[5]/td[1]/span',值:""},
+        "今天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[2]/span',值:""},
+        "7天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[2]/span',值:""},
+        "15天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[4]/td[2]/span',值:""},
+        "30天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[5]/td[2]/span',值:""}
+    },
+    首页面板:{
+        "未发货订单":{xpath:'//*[@id="OrderSummary"]/div/div[1]/div/div/div/div[2]',值:""},
+        "买家消息":{xpath:'//*[@id="BuyerSellerMessaging"]/div/div[1]/div/div/div/div[2]',值:""},
+        "七天营业额":{xpath:'//*[@id="Sales"]/div/div[1]/div/div/div/div[2]',值:""}
+    },
+    订单页面:{
+        "数量":{xpath:'//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]',值:"-1"},
+        "详情":[]
     }
 };
-
-/*var options = new chrome.Options();
-options.addArguments("user-data-dir=D:\\Chrome\\User Data\\");*/
-//options.addArguments("user-data-dir=C:\\Users\\xleox\\AppData\\Local\\Google\\Chrome\\User Data\\");
-var driver;
 
 exports.amazonLogin = function (username,password) {
     //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
-    options.addArguments("user-data-dir=D:\\Chrome\\User Data2\\");
+    options.addArguments("user-data-dir=D:\\Chrome\\User Data\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
@@ -63,37 +77,20 @@ exports.amazonLogin = function (username,password) {
                                         .then( checked=>{if(!checked) driver.findElement(By.name("rememberMe")).click();
                                         });
                                 });
-                            driver.findElements( By.xpath(xpaths.用户名))
-                                .then(doc => {
-                                    if(doc.length != 0)
-                                        driver.findElement(By.xpath(xpaths.用户名)).clear()
-                                            .then(()=>{return driver.findElement(By.xpath(xpaths.用户名)).sendKeys(username);})
-                                            .then(()=>{return driver.findElement(By.xpath(xpaths.密码)).clear()})
-                                            .then(()=>{return driver.findElement(By.xpath(xpaths.密码)).sendKeys(password);})
-                                            .then(()=>{return driver.findElement(By.xpath(xpaths.登陆按钮)).click();});
-                                    else
-                                        driver.findElements( By.xpath(xpaths.密码))
-                                            .then(doc => {
-                                                if(doc.length != 0)
-                                                    driver.findElement(By.xpath(xpaths.密码)).clear()
-                                                        .then(()=>{return driver.findElement(By.xpath(xpaths.密码)).sendKeys(password);})
-                                                        .then(()=>{return driver.findElement(By.xpath(xpaths.登陆按钮)).click();});
-                                            });
-                                        });
+                            Promise.all(inputTxtByXpath(xpaths.用户名,username),inputTxtByXpath(xpaths.密码,password))
+                                .finally(()=>{
+                                    driver.findElement(By.xpath(xpaths.登陆按钮)).click();
+                                })
                         });
                     }
-                /*return driver.wait(()=> {
+                return driver.wait(()=> {
                     return driver.getTitle()
                         .then( title => {  //等待进入界面
-                            if(title.indexOf("主页") >= 0 || title.indexOf("Home") >= 0 ||
-                                title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 ) return title;
+                            //if(title.indexOf("主页") >= 0 || title.indexOf("Home") >= 0 || title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 )
+                            if(title.indexOf("登录") == -1 && title.indexOf("Sign") == -1)
+                                return title;
                             else return false;
-                        } );}, 90*1000)*/
-                return driver.wait(until.elementLocated(By.xpath('//*[@id="widget-fxZAQm"]/div/div[1]/h2')), 60*1000)
-                    .then(()=>{
-                        return driver.getTitle()
-                            .then( title => {return title;} );
-                    })
+                        } );}, 90*1000)
             });
     }
 exports.getHomeInf = function () {
@@ -101,15 +98,70 @@ exports.getHomeInf = function () {
     for(var key in accountInf.首页信息){
         keys.push(key);
     }
-    Promise.map(keys,item=>{setTxt2Inf(accountInf.首页信息,item)})
-        .finally(
-            ()=>{console.log(accountInf.首页信息);}
-        )
-    /*setTxt2Inf(accountInf.首页信息,"名称")
-        .then(()=>{
-            console.log(accountInf.首页信息);
-        })*/
+    Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页信息,item)});
+
+    keys=[];
+    for(var key in accountInf.首页面板){
+        keys.push(key);
     }
+    Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
+    return new Promise(function(resolve, reject){resolve("获取首页信息完成");});
+}
+exports.getOderInf = function () {
+    driver.manage().window().maximize();
+    driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
+
+    return driver.getTitle()
+        .then( title => {  //等待进入界面
+            if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
+            else return false;
+        } , 60000).then(title => {
+            console.log('进入订单管理页面');
+            var xpaths={
+                进入新版本:'/html/body/div[5]/div/div[1]/table/tbody/tr/td/div[2]/a'};
+            driver.findElements( By.xpath(xpaths.进入新版本))
+                .then(doc => {if(doc.length != 0) driver.findElement(By.xpath(xpaths.进入新版本)).click();});
+
+            driver.wait(until.elementLocated(By.xpath(accountInf.订单页面.数量.xpath)), 10*1000)
+                .then(()=>{
+                    getElementTextByXpath(accountInf.订单页面.数量.xpath)
+                        .then(txt=>{
+                            orderNum=txt.replace(" 个订单","");
+                            console.log("订单数量",orderNum);
+                            if(isNaN(orderNum)){
+                                accountInf.订单页面.数量.值=-1;
+                                return new Promise(function(resolve, reject){reject("订单数量获取失败");});
+                            }else {
+                                accountInf.订单页面.数量.值=parseInt(orderNum);
+                                if(accountInf.订单页面.数量.值==0){
+                                    accountInf.订单页面.详情=[];
+                                }else if(accountInf.订单页面.数量.值>0){
+                                    var orderNum=[];
+                                    for(var i=1;i<accountInf.订单页面.数量.值 && i<=50;i++){
+                                        accountInf.订单页面.详情[i-1]={
+                                            日期1:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[2]/div/div[1]/div',值:""},
+                                            日期2:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[2]/div/div[2]/div',值:""},
+                                            日期3:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[2]/div/div[3]/div',值:""},
+                                            订单编号:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[3]/div/div[1]/a',值:""},
+                                            买家姓名:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[3]/div/div[2]/div/a',值:""},
+                                            销售渠道:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[3]/div/div[4]',值:""},
+                                            商品名称:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[1]/div/a',值:""},
+                                            ASIN:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[2]/div/b',值:""},
+                                            SKU:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[3]/div',值:""},
+                                            数量:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[4]/div/b',值:""},
+                                            金额:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[5]/div',值:""},
+                                            订单状态:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[7]/div/div[1]/div/div/span/span',值:""}
+                                        };
+                                        orderNum.push(i-1);
+                                    }
+                                    //console.log(JSON.stringify(accountInf.订单页面.详情));
+                                    Promise.mapSeries(orderNum,tableTr=>{getTableByTr(tableTr)});
+                                }
+                            }
+                        });
+                });
+        })
+}
 exports.quit=function () {
     driver.quit();
 }
@@ -123,7 +175,7 @@ exports.quit=function () {
 setTxt2Inf = function (infJson, name) {
     return getElementTextByXpath(infJson[name]['xpath'])
         .then(txt=>{
-            console.log(txt);
+            console.log(name,txt);
             infJson[name]['值']=txt;
             return name;
         });
@@ -140,6 +192,42 @@ getElementTextByXpath = function (xpath) {
                     return driver.findElement(By.xpath(xpath))
                         .getText().then(txt => {return txt;});
                 else
-                    return '';
+                    return 'unknown';
             });
     }
+/**
+ * 从xpath获取txt文本
+ * @param xpath
+ * @returns {Promise<Array<WebElement>>}
+ */
+getTableByTr = function (trInt) {
+    var keys=[];
+    for(var key in accountInf.订单页面.详情[trInt]){
+        keys.push(key);
+    }
+    return Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.订单页面.详情[trInt],item)});
+}
+/**
+ * 输入input
+ * @param xpath
+ * @returns {Promise<Array<WebElement>>}
+ */
+inputTxtByXpath = function (xpath,v) {
+    return driver.findElements( By.xpath(xpath) )
+        .then(doc => {
+            if (doc.length != 0)
+                return driver.findElement(By.xpath(xpath)).getAttribute("value")
+                    .then(value=>{
+                        if(value == "")
+                            return driver.findElement(By.xpath(xpath)).sendKeys(v);
+                        else
+                            return "";
+                    });
+            else
+                return '';
+        });
+    }
+
+exports.accountInf=function () {
+    return accountInf;
+}
