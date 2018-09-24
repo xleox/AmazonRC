@@ -19,10 +19,13 @@ var getBaseInf = function () {
             setTimeout(()=>{chrome.getOderInf()},10000);
             setTimeout(()=>{chrome.quit()},90000);
         })
-        .catch(err => { console.log("登陆错误" , err); });
+        .catch(err => {
+            chrome.quit();
+            console.log("登陆错误" , err);
+        });
 };
 getBaseInf();
-setInterval(()=>{getBaseInf()},300*1000)
+setInterval(()=>{getBaseInf()},600*1000)
 
 
 router.get('/test',(req,res) => {

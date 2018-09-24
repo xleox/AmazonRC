@@ -104,7 +104,7 @@ exports.amazonLogin = function (username,password) {
 exports.getHomeInf = function () {
     var keys=[];
     for(var key in accountInf.首页信息){
-        accountInf.首页信息[key]['值']='loading';
+        //accountInf.首页信息[key]['值']='loading';
         keys.push(key);
     }
     Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页信息,item)});
@@ -112,7 +112,7 @@ exports.getHomeInf = function () {
 
     keys=[];
     for(var key in accountInf.首页面板){
-        accountInf.首页面板[key]['值']='loading';
+        //accountInf.首页面板[key]['值']='loading';
         keys.push(key);
     }
     Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
@@ -218,7 +218,7 @@ getElementTextByXpath = function (xpath) {
 getTableByTr = function (trInt) {
     var keys=[];
     for(var key in accountInf.订单页面.详情[trInt]){
-        accountInf.订单页面.详情[trInt][key]['值']='loading';
+        //accountInf.订单页面.详情[trInt][key]['值']='loading';
         keys.push(key);
     }
     return Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.订单页面.详情[trInt],item)});
