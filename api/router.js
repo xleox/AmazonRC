@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const chrome = require('./seleTest2');
+const chrome = require('./seleTest');
 const sleep = require('sleep');
 
 router.get('/',(req,res)=>{
