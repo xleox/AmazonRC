@@ -14,10 +14,10 @@ let accountInf={
     },
     首页信息:{
         名称:{xpath:'//*[@id="sc-mkt-switcher-form"]/div',值:""},
-        等待中:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[last()-2]/span[1]/span/a/div[1]/span',值:""},
-        未发货先配送:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[last()-2]/span[2]/span/a/div[1]/span',值:""},
-        未发货:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[last()-2]/span[3]/span/a/div[1]/span',值:""},
-        退货请求:{xpath:'//*[@id="widget-fxmXCT"]/div/div[2]/div[last()-2]/span[4]/span/a/div[1]/span',值:""},
+        等待中:{xpath:'.//div[text()="等待中"]/../div/span',值:""},
+        未发货先配送:{xpath:'.//div[text()="未发货的优先配送订单"]/../div/span',值:""},
+        未发货:{xpath:'.//div[text()="未发货"]/../div/span',值:""},
+        退货请求:{xpath:'.//div[text()="退货请求"]/../div/span',值:""},
         产品数量:{xpath:'//*[@id="lisitngCount"]',值:""},
         订单数量:{xpath:'//*[@id="OrderSummary"]/div/div[1]/div/div/div/div[2]',值:""},
         买家消息:{xpath:'//*[@id="bsm-record-metrics"]/span/span/a/div[1]/span',值:""},
@@ -25,17 +25,18 @@ let accountInf={
         AtoZ:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[1]/span/a/div[1]/span',值:""},
         信用卡拒付:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[2]/span/a/div[1]/span',值:""},
         最近付款:{xpath:'//*[@id="fundTransferInfo"]/div/div[1]/div[2]/span/span/a/span',值:""},
+        付款信息:{xpath:'//*[@id="fundTransferInfo"]/div/div[2]',值:""},
         通知:{xpath:'//*[@id="sc-snes-number"]',值:""},
         其他通知:{xpath:'//*[@id="widget-glKEIi"]/div/div/p/strong',值:""},
         余额:{xpath:'//*[@id="seller-payments-widget"]/div[1]/div/div/div[last()]/div/div/div/div[2]/span/span/a/span',值:""},
-        今天销售额:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[1]/span',值:""},
-        "7天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[1]/span',值:""},
-        "15天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[4]/td[1]/span',值:""},
-        "30天销售额":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[5]/td[1]/span',值:""},
-        "今天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[2]/span',值:""},
-        "7天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[2]/span',值:""},
-        "15天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[4]/td[2]/span',值:""},
-        "30天件数":{xpath:'//*[@id="sales-summary-table"]/tbody/tr[5]/td[2]/span',值:""}
+        销售额今天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[1]/span',值:""},
+        销售额7天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[1]/span',值:""},
+        销售额15天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[4]/td[1]/span',值:""},
+        销售额30天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[5]/td[1]/span',值:""},
+        件数今天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[2]/td[2]/span',值:""},
+        件数7天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[3]/td[2]/span',值:""},
+        件数15天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[4]/td[2]/span',值:""},
+        件数30天:{xpath:'//*[@id="sales-summary-table"]/tbody/tr[5]/td[2]/span',值:""}
     },
     首页面板:{
         "未发货订单":{xpath:'//*[@id="OrderSummary"]/div/div[1]/div/div/div/div[2]',值:""},
@@ -122,7 +123,7 @@ exports.getHomeInf = function () {
     Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
     accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');
 
-    return new Promise(function(resolve, reject){resolve("获取首页信息完成");});
+    //return new Promise(function(resolve, reject){resolve("获取首页信息完成");});
 }
 exports.getOderInf = function () {
     driver.manage().window().maximize();
@@ -155,7 +156,7 @@ exports.getOderInf = function () {
                                     accountInf.更新时间.订单页面=moment().format('YYYY-MM-DD HH:mm:ss');
                                 }else if(accountInf.订单页面.数量.值>0){
                                     var orderNum=[];
-                                    for(var i=1;i<accountInf.订单页面.数量.值 && i<=50;i++){
+                                    for(var i=1;i<=accountInf.订单页面.数量.值 && i<=50;i++){
                                         accountInf.订单页面.详情[i-1]={
                                             日期1:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[2]/div/div[1]/div',值:""},
                                             日期2:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[2]/div/div[2]/div',值:""},
