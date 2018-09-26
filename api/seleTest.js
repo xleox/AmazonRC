@@ -57,7 +57,7 @@ let accountInf={
 exports.amazonLogin = function (username,password) {
     //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
-    options.addArguments("user-data-dir=D:\\Chrome\\User Data\\");
+    options.addArguments("user-data-dir=D:\\Chrome\\User Data2\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
@@ -110,19 +110,23 @@ exports.getHomeInf = function () {
     var keys=[];
     for(var key in accountInf.首页信息){
         //accountInf.首页信息[key]['值']='loading';
-        keys.push(key);
+        //keys.push(key);
+        keys.push(setTxt2Inf(accountInf.首页信息,key));
     }
-    Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页信息,item)});
-    accountInf.更新时间.首页信息=moment().format('YYYY-MM-DD HH:mm:ss');
+    Promise.all(keys).finally(
+            ()=>{accountInf.更新时间.首页信息=moment().format('YYYY-MM-DD HH:mm:ss');});
+    //Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页信息,item)});
+
 
     keys=[];
     for(var key in accountInf.首页面板){
         //accountInf.首页面板[key]['值']='loading';
-        keys.push(key);
+        //keys.push(key);
+        keys.push(setTxt2Inf(accountInf.首页面板,key));
     }
-    Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
-    accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');
-
+    Promise.all(keys).finally(
+            ()=>{accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');});
+    //Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
     //return new Promise(function(resolve, reject){resolve("获取首页信息完成");});
 }
 exports.getOderInf = function () {
