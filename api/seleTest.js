@@ -57,7 +57,7 @@ let accountInf={
 exports.amazonLogin = function (username,password) {
     //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
-    options.addArguments("user-data-dir=D:\\Chrome\\User Data2\\");
+    options.addArguments("user-data-dir=D:\\Chrome\\User Data\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
@@ -169,6 +169,7 @@ exports.getOderInf = function () {
                                             买家姓名:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[3]/div/div[2]/div/a',值:""},
                                             销售渠道:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[3]/div/div[4]',值:""},
                                             商品名称:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[1]/div/a',值:""},
+                                            商品图片:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[4]/div/img',值:""},
                                             ASIN:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[2]/div/b',值:""},
                                             SKU:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[3]/div',值:""},
                                             数量:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[5]/div/div/div[4]/div/b',值:""},
@@ -196,20 +197,28 @@ exports.quit=function () {
  * @param xpath 读取的路径
  * @returns {*|PromiseLike<T>|Promise<T>}
  */
-setTxt2Inf = function (infJson, name) {
-    return getElementTextByXpath(infJson[name]['xpath'])
-        .then(txt=>{
-            console.log(name,txt);
-            infJson[name]['值']=txt;
-            return name;
-        });
+let setTxt2Inf = function (infJson, name) {
+    if(name == '产品图片'){
+        return getElementSrcByXpath(infJson[name]['xpath'])
+            .then(txt=>{
+                console.log(name,txt);
+                infJson[name]['值']=txt;
+                return name;
+            });
+    }else
+        return getElementTextByXpath(infJson[name]['xpath'])
+            .then(txt=>{
+                console.log(name,txt);
+                infJson[name]['值']=txt;
+                return name;
+            });
     }
 /**
  * 从xpath获取txt文本
  * @param xpath
  * @returns {Promise<Array<WebElement>>}
  */
-getElementTextByXpath = function (xpath) {
+let getElementTextByXpath = function (xpath) {
     return driver.findElements( By.xpath(xpath) )
             .then(doc => {
                 if (doc.length != 0)
@@ -219,12 +228,22 @@ getElementTextByXpath = function (xpath) {
                     return 'unknown';
             });
     }
+let getElementSrcByXpath = function (xpath) {
+    return driver.findElements( By.xpath(xpath) )
+        .then(doc => {
+            if (doc.length != 0)
+                return driver.findElement(By.xpath(xpath))
+                    .getAttribute("src").then(txt => {return txt;});
+            else
+                return 'unknown';
+        });
+}
 /**
  * 从xpath获取txt文本
  * @param xpath
  * @returns {Promise<Array<WebElement>>}
  */
-getTableByTr = function (trInt) {
+let getTableByTr = function (trInt) {
     var keys=[];
     for(var key in accountInf.订单页面.详情[trInt]){
         //accountInf.订单页面.详情[trInt][key]['值']='loading';
@@ -237,7 +256,7 @@ getTableByTr = function (trInt) {
  * @param xpath
  * @returns {Promise<Array<WebElement>>}
  */
-inputTxtByXpath = function (xpath,v) {
+let inputTxtByXpath = function (xpath,v) {
     return driver.findElements( By.xpath(xpath) )
         .then(doc => {
             if (doc.length != 0)
