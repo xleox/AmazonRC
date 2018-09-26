@@ -17,7 +17,7 @@ var getBaseInf = function () {
             console.log("登陆成功" , title);
             chrome.getHomeInf();
             setTimeout(()=>{chrome.getOderInf()},10*1000);
-            setTimeout(()=>{chrome.quit()},90*1000);
+            setTimeout(()=>{chrome.close()},90*1000);
         })
         .catch(err => {
             chrome.quit();

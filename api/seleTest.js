@@ -187,8 +187,11 @@ exports.getOderInf = function () {
                 });
         })
 }
-exports.quit=function () {
+exports.close=function () {
     driver.close();
+}
+exports.quit=function () {
+    driver.quit();
 }
 /**
  * 把数据写入到JSON里
