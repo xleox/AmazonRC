@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const chrome = require('./seleTest');
+const chrome = require('./seleTestNew');
 const sleep = require('sleep');
 
 router.get('/',(req,res)=>{
@@ -17,12 +17,12 @@ var getBaseInf = function () {
             console.log("登陆成功" , title);
 
             chrome.getHomeInf();
-                /*.then(ret =>{
+               /* then(ret =>{
                 //console.log(ret);
                 chrome.getOderInf();
             });*/
-            setTimeout(()=>{chrome.getOderInf()},15*1000);
-            setTimeout(()=>{chrome.close()},90*1000);
+            //setTimeout(()=>{chrome.getOderInf()},15*1000);
+            //setTimeout(()=>{chrome.close()},90*1000);
         })
         .catch(err => {
             chrome.quit();

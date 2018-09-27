@@ -5,11 +5,13 @@ const webdriver = require('selenium-webdriver'),
 const chrome = require('selenium-webdriver/chrome');
 const Promise = require("bluebird");
 const moment = require("moment");
+const cheerio = require('cheerio')
+
 let driver;
 
 let accountInf={
     版本:{
-        编号:"2.0.0.1",
+        编号:"2.0.1.0",
         名称:"月亮"
     },
     首页信息:{
@@ -25,6 +27,7 @@ let accountInf={
         AtoZ:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[1]/span/a/div[1]/span',值:""},
         信用卡拒付:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[2]/span/a/div[1]/span',值:""},
         账户状况:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[4]/span/span/a/div[1]/span',值:""},
+        买家反馈:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[5]/span/span/a',值:""},
         最近付款:{xpath:'//*[@id="fundTransferInfo"]/div/div[1]/div[2]/span/span/a/span',值:""},
         付款信息:{xpath:'//*[@id="fundTransferInfo"]/div/div[2]',值:""},
         通知:{xpath:'//*[@id="sc-snes-number"]',值:""},
@@ -108,7 +111,18 @@ exports.amazonLogin = function (username,password) {
             });
     }
 exports.getHomeInf = function () {
-    var keys=[];
+    driver.getPageSource()
+        .then(html=> {
+            let $=cheerio.load(html);
+            $('.kpiSummaryPrimaryValue').nextAll().each((i,e)=>{
+                console.log($(this).text());
+            })
+
+            console.log($('#sc-mkt-switcher-form').length);
+            console.log($('.kpiSummaryPrimaryValue').length);
+        });
+
+    /*var keys=[];
     for(var key in accountInf.首页信息){
         keys.push(setTxt2Inf(accountInf.首页信息,key));
     }
@@ -116,10 +130,10 @@ exports.getHomeInf = function () {
         keys.push(setTxt2Inf(accountInf.首页面板,key));
     }
     accountInf.更新时间.首页信息=moment().format('YYYY-MM-DD HH:mm:ss');
-    accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');
+    accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');*/
     //Promise.race(keys).then(ret => console.log(ret) );
     //queue(keys);
-    console.log(mergePromise(keys));
+    //mergePromise(keys);
     //return mergePromise(keys);
 }
 exports.getOderInf = function () {
