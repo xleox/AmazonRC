@@ -24,6 +24,7 @@ let accountInf={
         超过24小时:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[3]/span[2]/span/a',值:""},
         AtoZ:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[1]/span/a/div[1]/span',值:""},
         信用卡拒付:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[1]/span[2]/span/a/div[1]/span',值:""},
+        账户状况:{xpath:'//*[@id="widget-fti8vf"]/div/div[2]/div[4]/span/span/a/div[1]/span',值:""},
         最近付款:{xpath:'//*[@id="fundTransferInfo"]/div/div[1]/div[2]/span/span/a/span',值:""},
         付款信息:{xpath:'//*[@id="fundTransferInfo"]/div/div[2]',值:""},
         通知:{xpath:'//*[@id="sc-snes-number"]',值:""},
@@ -109,25 +110,16 @@ exports.amazonLogin = function (username,password) {
 exports.getHomeInf = function () {
     var keys=[];
     for(var key in accountInf.首页信息){
-        //accountInf.首页信息[key]['值']='loading';
-        //keys.push(key);
         keys.push(setTxt2Inf(accountInf.首页信息,key));
     }
-    Promise.all(keys).finally(
-            ()=>{accountInf.更新时间.首页信息=moment().format('YYYY-MM-DD HH:mm:ss');});
-    //Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页信息,item)});
-
-
-    keys=[];
     for(var key in accountInf.首页面板){
-        //accountInf.首页面板[key]['值']='loading';
-        //keys.push(key);
         keys.push(setTxt2Inf(accountInf.首页面板,key));
     }
-    Promise.all(keys).finally(
-            ()=>{accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');});
-    //Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.首页面板,item)});
-    //return new Promise(function(resolve, reject){resolve("获取首页信息完成");});
+    accountInf.更新时间.首页信息=moment().format('YYYY-MM-DD HH:mm:ss');
+    accountInf.更新时间.首页面板=moment().format('YYYY-MM-DD HH:mm:ss');
+    //Promise.race(keys).then(ret => console.log(ret) );
+    //queue(keys);
+    return mergePromise(keys);
 }
 exports.getOderInf = function () {
     driver.manage().window().maximize();
@@ -160,6 +152,7 @@ exports.getOderInf = function () {
                                     accountInf.更新时间.订单页面=moment().format('YYYY-MM-DD HH:mm:ss');
                                 }else if(accountInf.订单页面.数量.值>0){
                                     var orderNum=[];
+                                    var TodoList=[];
                                     for(var i=1;i<=accountInf.订单页面.数量.值 && i<=50;i++){
                                         accountInf.订单页面.详情[i-1]={
                                             日期1:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[2]/div/div[1]/div',值:""},
@@ -177,10 +170,13 @@ exports.getOderInf = function () {
                                             订单状态:{xpath:'//*[@id="orders-table"]/tbody/tr['+i+']/td[7]/div/div[1]/div/div/span/span',值:""}
                                         };
                                         orderNum.push(i-1);
+                                        TodoList.push(getTableByTr(i-1));
                                     }
                                     //console.log(JSON.stringify(accountInf.订单页面.详情));
-                                    Promise.mapSeries(orderNum,tableTr=>{getTableByTr(tableTr)});
+                                    //Promise.mapSeries(orderNum,tableTr=>{getTableByTr(tableTr)});
                                     accountInf.更新时间.订单页面=moment().format('YYYY-MM-DD HH:mm:ss');
+                                    //return Promise.all(TodoList);
+                                    return mergePromise(TodoList);
                                 }
                             }
                         });
@@ -193,6 +189,28 @@ exports.close=function () {
 exports.quit=function () {
     driver.quit();
 }
+
+/**
+ * 按顺序执行
+ * @param arr
+ * @returns {Promise<*>}
+ */
+let mergePromise = function(ajaxArray){
+    let arr = [];
+    let p = Promise.resolve();
+    ajaxArray.forEach(item=>{
+        p = p.then(data=>{
+            if(data){
+                arr.push(data);
+            }
+            return item;
+        });
+    })
+    return p.then(data=>{
+        arr.push(data);
+        return arr;
+    })
+}
 /**
  * 把数据写入到JSON里
  * @param infJson 根JSON
@@ -201,19 +219,19 @@ exports.quit=function () {
  * @returns {*|PromiseLike<T>|Promise<T>}
  */
 let setTxt2Inf = function (infJson, name) {
-    if(name == '产品图片'){
+    if(name == '商品图片'){
         return getElementSrcByXpath(infJson[name]['xpath'])
             .then(txt=>{
                 console.log(name,txt);
                 infJson[name]['值']=txt;
-                return name;
+                return new Promise(function(resolve, reject){resolve(name);});;
             });
     }else
         return getElementTextByXpath(infJson[name]['xpath'])
             .then(txt=>{
                 console.log(name,txt);
                 infJson[name]['值']=txt;
-                return name;
+                return new Promise(function(resolve, reject){resolve(name);});;
             });
     }
 /**
@@ -250,9 +268,12 @@ let getTableByTr = function (trInt) {
     var keys=[];
     for(var key in accountInf.订单页面.详情[trInt]){
         //accountInf.订单页面.详情[trInt][key]['值']='loading';
-        keys.push(key);
+        keys.push(setTxt2Inf(accountInf.订单页面.详情[trInt],key));
+        //keys.push(key);
     }
-    return Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.订单页面.详情[trInt],item)});
+    return Promise.all(keys);
+    //queue(keys);
+    //return Promise.mapSeries(keys,item=>{setTxt2Inf(accountInf.订单页面.详情[trInt],item)});
 }
 /**
  * 输入input

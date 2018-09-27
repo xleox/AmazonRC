@@ -15,8 +15,13 @@ var getBaseInf = function () {
                 return title;
             }
             console.log("登陆成功" , title);
+
             chrome.getHomeInf();
-            setTimeout(()=>{chrome.getOderInf()},10*1000);
+                /*.then(ret =>{
+                //console.log(ret);
+                chrome.getOderInf();
+            });*/
+            setTimeout(()=>{chrome.getOderInf()},15*1000);
             setTimeout(()=>{chrome.close()},90*1000);
         })
         .catch(err => {
