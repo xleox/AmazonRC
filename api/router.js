@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const chrome = require('./seleTestNew');
-const sleep = require('sleep');
+const chrome = require('./seleSaveAndControl');
+const moment = require('moment');
+const fs = require('fs');
+const config = require('./setting').config;
 
 router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
 });
 
 var getBaseInf = function () {
-    chrome.amazonLogin("xleox@vip.qq.com","asdf1234x")
+    chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
             if(title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 ){
                 console.log("两步验证，需要协助登陆" , title);
@@ -16,25 +18,28 @@ var getBaseInf = function () {
             }
             console.log("登陆成功" , title);
 
-            chrome.getHomeInf();
-               /* then(ret =>{
-                //console.log(ret);
-                chrome.getOderInf();
-            });*/
-            //setTimeout(()=>{chrome.getOderInf()},15*1000);
-            //setTimeout(()=>{chrome.close()},90*1000);
+            chrome.getHomePageHtml().then(homeHtml=>{
+                return new Promise(function(resolve, reject){resolve(homeHtml);});
+            }).then(homeHtml=>{
+                chrome.getOrderPageHtml().then(Orderhtml=>{
+                    var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
+                    fs.writeFileSync("./public/homeAndOrderPage.txt",homeHtml + Orderhtml + t);
+                })
+            });
+            setTimeout(()=>{chrome.quit()},90*1000);
         })
         .catch(err => {
             chrome.quit();
             console.log("登陆错误" , err);
         });
 };
+
 getBaseInf();
 setInterval(()=>{getBaseInf()},600*1000)
 
 
 router.get('/test',(req,res) => {
-    chrome.amazonLogin("xleox@vip.qq.com","asdf1234x")
+    chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
             if(title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0){
                 console.log("两步验证，需要协助登陆" , title);
