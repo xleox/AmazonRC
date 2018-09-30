@@ -12,6 +12,7 @@ let driver;
 exports.amazonLogin = function (username,password) {
     //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
+
     options.addArguments("user-data-dir="+config.文件路径);
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
@@ -61,10 +62,10 @@ exports.amazonLogin = function (username,password) {
                         } );}, 90*1000)
             });
     }
-exports.getHomePageHtml = function (savePath) {
+exports.getHomePageHtml = function () {
     return driver.getPageSource();
 }
-exports.getOrderPageHtml = function (savePath) {
+exports.getOrderPageHtml = function () {
     driver.manage().window().maximize();
     //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
     //driver.get('https://sellercentral.amazon.com/orders-v3/mfn/shipped?ref_=xx_myo_dnav_home&_encoding=UTF8&date-range=last-365&page=1');
@@ -88,7 +89,29 @@ exports.getOrderPageHtml = function (savePath) {
                 });
         });
 }
+exports.getOrderShippedPageHtml = function () {
+    driver.manage().window().maximize();
+    //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
+    driver.get('https://sellercentral.amazon.com/orders-v3/mfn/shipped?ref_=xx_myo_dnav_xx&_encoding=UTF8&date-range=last-14&page=1');
+    return driver.getTitle()
+        .then( title => {  //等待进入界面
+            if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
+            else return false;
+        } , 60000).then(title => {
+            console.log('进入订单管理页面');
+            var xpaths={
+                进入新版本:'/html/body/div[5]/div/div[1]/table/tbody/tr/td/div[2]/a'};
+            driver.findElements( By.xpath(xpaths.进入新版本))
+                .then(doc => {if(doc.length != 0) driver.findElement(By.xpath(xpaths.进入新版本)).click();});
 
+            //查看订单数量
+            return driver.wait(until.elementLocated(By.xpath('//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]')), 10*1000)
+                .then(()=>{
+                    sleep.msleep(10*1000);
+                    return driver.getPageSource();
+                });
+        });
+}
 exports.close=function () {
     driver.close();
 }
@@ -116,55 +139,6 @@ let mergePromise = function(ajaxArray){
         arr.push(data);
         return arr;
     })
-}
-/**
- * 把数据写入到JSON里
- * @param infJson 根JSON
- * @param name JSON的key
- * @param xpath 读取的路径
- * @returns {*|PromiseLike<T>|Promise<T>}
- */
-let setTxt2Inf = function (infJson, name) {
-    if(name == '商品图片'){
-        return getElementSrcByXpath(infJson[name]['xpath'])
-            .then(txt=>{
-                console.log(name,txt);
-                infJson[name]['值']=txt;
-                return new Promise(function(resolve, reject){resolve(name);});
-            });
-    }else
-        return getElementTextByXpath(infJson[name]['xpath'])
-            .then(txt=>{
-                console.log(name,txt);
-                infJson[name]['值']=txt;
-                sleep.msleep(100);
-                return new Promise(function(resolve, reject){resolve(name);});
-            });
-    }
-/**
- * 从xpath获取txt文本
- * @param xpath
- * @returns {Promise<Array<WebElement>>}
- */
-let getElementTextByXpath = function (xpath) {
-    return driver.findElements( By.xpath(xpath) )
-            .then(doc => {
-                if (doc.length != 0)
-                    return driver.findElement(By.xpath(xpath))
-                        .getText().then(txt => {return txt;});
-                else
-                    return 'unknown';
-            }).catch(err=>{"获取数据的时候出错了",err});
-    }
-let getElementSrcByXpath = function (xpath) {
-    return driver.findElements( By.xpath(xpath) )
-        .then(doc => {
-            if (doc.length != 0)
-                return driver.findElement(By.xpath(xpath))
-                    .getAttribute("src").then(txt => {return txt;});
-            else
-                return 'unknown';
-        });
 }
 
 /**

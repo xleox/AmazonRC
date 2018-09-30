@@ -4,7 +4,10 @@ const chrome = require('./seleSaveAndControl');
 const moment = require('moment');
 const fs = require('fs');
 const config = require('./setting').config;
-
+const 版本={
+    代号:'2.0.0.1',
+    名称:'牛刀'
+}
 router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
 });
@@ -22,8 +25,16 @@ var getBaseInf = function () {
                 return new Promise(function(resolve, reject){resolve(homeHtml);});
             }).then(homeHtml=>{
                 chrome.getOrderPageHtml().then(Orderhtml=>{
-                    var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
-                    fs.writeFileSync("./public/homeAndOrderPage.txt",homeHtml + Orderhtml + t);
+                    //var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
+                    //fs.writeFileSync("./public/homeAndOrderPage.txt",homeHtml + Orderhtml + t);
+                    return new Promise(function(resolve, reject){resolve(homeHtml + Orderhtml);});
+                }).then(homeOrderHtml=>{
+                    chrome.getOrderShippedPageHtml().then(ShipedOrderhtml=> {
+                        var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
+                        var v='<verNumber>'+版本.代号+'</verNumber>';
+                        var n='<verName>'+版本.名称+'</verName>';
+                        fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderHtml + ShipedOrderhtml + t + v + n);
+                    });
                 })
             });
             setTimeout(()=>{chrome.quit()},90*1000);

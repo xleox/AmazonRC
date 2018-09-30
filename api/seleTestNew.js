@@ -61,7 +61,7 @@ let accountInf={
 exports.amazonLogin = function (username,password) {
     //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
-    options.addArguments("user-data-dir=D:\\Chrome\\User Data\\");
+    options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
