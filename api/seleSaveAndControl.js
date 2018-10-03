@@ -9,7 +9,6 @@ const moment = require("moment");
 let driver;
 
 exports.amazonLogin = function (username,password) {
-    //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
 
     options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
