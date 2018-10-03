@@ -3,11 +3,54 @@ const router = express.Router();
 const chrome = require('./seleSaveAndControl');
 const moment = require('moment');
 const fs = require('fs');
+const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
     代号:'2.0.0.1',
     名称:'牛刀'
 }
+
+let readMission=[];
+/*readMission=[{
+    url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=111-4667144-2665047',
+    saveFile:"111-4667144-2665047"
+},{
+    url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=113-8512576-6713068',
+    saveFile:"113-8512576-6713068"
+},{
+    url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=701-5241496-1581001',
+    saveFile:"701-5241496-1581001"
+}];*/
+let addReadMission = function (url, saveFile) {
+    for(var i=0;i<readMission.length;i++){
+        if(readMission[i].url == url && readMission[i].saveFile == saveFile)
+            return '任务已在列表中';
+    }
+    readMission.push({url:url,saveFile:saveFile});
+    return '添加成功';
+}
+
+let readUrlThenSave=function (url,saveFile) {
+    return chrome.getUrlHtml(url).then(
+        html=>{
+            fs.writeFileSync("./public/"+saveFile+".txt",html);
+            return new Promise(function(resolve, reject){resolve('done');});
+        });
+}
+router.post('/addReadMisson',(req,res)=>{
+    //console.log(req.body);
+    if(req.body.url == undefined || req.body.saveFile == undefined)
+    {
+        res.send('格式错误');
+        return;
+    }
+    if(req.body.url == '' || req.body.saveFile == '')
+    {
+        res.send('格式错误');
+        return;
+    }
+    res.send(addReadMission(req.body.url,req.body.saveFile));
+});
 router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
 });
@@ -34,20 +77,34 @@ var getBaseInf = function () {
                         var v='<verNumber>'+版本.代号+'</verNumber>';
                         var n='<verName>'+版本.名称+'</verName>';
                         fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderHtml + ShipedOrderhtml + t + v + n);
+
+                        if(readMission.length>0)
+                        readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret=>{
+                            readMission.splice(0,1);
+                            if(readMission.length>0)
+                            return readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret=>{
+                                readMission.splice(0,1);
+                                if(readMission.length>0)
+                                return readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(
+                                    ret=>{readMission.splice(0,1);
+                                });
+                            });
+
                     });
                 })
             });
-            setTimeout(()=>{chrome.quit()},90*1000);
+
+            setTimeout(()=>{chrome.quit()},120*1000);
         })
         .catch(err => {
             chrome.quit();
             console.log("登陆错误" , err);
         });
-};
+    });
+}
 
 getBaseInf();
-setInterval(()=>{getBaseInf()},600*1000)
-
+setInterval(()=>{getBaseInf()},600*1000);
 
 router.get('/test',(req,res) => {
     chrome.amazonLogin(config.账户,config.密码)

@@ -5,7 +5,6 @@ const webdriver = require('selenium-webdriver'),
 const chrome = require('selenium-webdriver/chrome');
 const Promise = require("bluebird");
 const moment = require("moment");
-const config = require('./setting').config;
 
 let driver;
 
@@ -13,7 +12,7 @@ exports.amazonLogin = function (username,password) {
     //var driver = new webdriver.Builder().forBrowser('chrome').build();
     var options = new chrome.Options();
 
-    options.addArguments("user-data-dir="+config.文件路径);
+    options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
@@ -59,7 +58,7 @@ exports.amazonLogin = function (username,password) {
                             if(title.indexOf("登录") == -1 && title.indexOf("Sign") == -1)
                                 return title;
                             else return false;
-                        } );}, 90*1000)
+                        } );}, 120*1000)
             });
     }
 exports.getHomePageHtml = function () {
@@ -75,7 +74,7 @@ exports.getOrderPageHtml = function () {
             if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
             else return false;
         } , 60000).then(title => {
-            console.log('进入订单管理页面');
+            console.log('订单管理-未发货');
             var xpaths={
                 进入新版本:'/html/body/div[5]/div/div[1]/table/tbody/tr/td/div[2]/a'};
             driver.findElements( By.xpath(xpaths.进入新版本))
@@ -98,7 +97,7 @@ exports.getOrderShippedPageHtml = function () {
             if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
             else return false;
         } , 60000).then(title => {
-            console.log('进入订单管理页面');
+            console.log('订单管理-已发货');
             var xpaths={
                 进入新版本:'/html/body/div[5]/div/div[1]/table/tbody/tr/td/div[2]/a'};
             driver.findElements( By.xpath(xpaths.进入新版本))
@@ -112,6 +111,13 @@ exports.getOrderShippedPageHtml = function () {
                 });
         });
 }
+exports.getUrlHtml = function (url) {
+    return driver.get(url).then(()=>{
+        sleep.msleep(15*1000);
+        return driver.getPageSource();
+    });
+
+}
 exports.close=function () {
     driver.close();
 }
@@ -119,27 +125,6 @@ exports.quit=function () {
     driver.quit();
 }
 
-/**
- * 按顺序执行
- * @param arr
- * @returns {Promise<*>}
- */
-let mergePromise = function(ajaxArray){
-    let arr = [];
-    let p = Promise.resolve();
-    ajaxArray.forEach(item=>{
-        p = p.then(data=>{
-            if(data){
-                arr.push(data);
-            }
-            return item;
-        });
-    });
-    return p.then(data=>{
-        arr.push(data);
-        return arr;
-    })
-}
 
 /**
  * 输入input
