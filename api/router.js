@@ -54,7 +54,9 @@ router.post('/addReadMisson',(req,res)=>{
 router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
 });
-
+router.get('/readMission',(req,res)=>{
+    res.JSON(readMission);
+});
 var getBaseInf = function () {
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
