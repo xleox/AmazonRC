@@ -1,5 +1,6 @@
 .idea
 /package-lock.json
-/node_modules/
+
 AmazonRC.rar
 /api/setting.js
+/undefined/
