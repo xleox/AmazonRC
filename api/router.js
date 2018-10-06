@@ -58,6 +58,7 @@ router.get('/readMission',(req,res)=>{
     res.JSON(readMission);
 });
 var getBaseInf = function () {
+    setTimeout(()=>{chrome.quit()},120*1000);
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
             if(title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 ){
@@ -95,8 +96,6 @@ var getBaseInf = function () {
                     });
                 })
             });
-
-            setTimeout(()=>{chrome.quit()},120*1000);
         })
         .catch(err => {
             chrome.quit();
