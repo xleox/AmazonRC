@@ -18,5 +18,5 @@ app.set("view engine", "ejs");
 app.use(router);
 
 var server = app.listen(PORT,"0.0.0.0", function () {
-    console.log('Start At Port', PORT);
+    console.log('RC Start At Port', PORT);
 });
