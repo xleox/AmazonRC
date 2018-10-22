@@ -127,7 +127,7 @@ exports.sendItems = function (url, trackIDs) {
                 }
         Promise.all(sendMission)
             .finally(()=>{
-                //driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
+                driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
             })
 
     })
