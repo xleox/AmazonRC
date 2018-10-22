@@ -6,10 +6,13 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.0.1',
+    代号:'2.0.0.2',
     名称:'牛刀'
 }
+let RcState="";
+let RcBusy=false;
 
+let doMission=[];
 let readMission=[];
 /*readMission=[{
     url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=111-4667144-2665047',
@@ -59,12 +62,15 @@ router.get('/readMission',(req,res)=>{
 });
 var getBaseInf = function () {
     setTimeout(()=>{chrome.quit()},120*1000);
+    RcState="正在打开页面";
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
             if(title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 ){
+                RcState="两步验证，需要协助登陆";
                 console.log("两步验证，需要协助登陆" , title);
                 return title;
             }
+            RcState="登陆成功";
             console.log("登陆成功" , title);
 
             chrome.getHomePageHtml().then(homeHtml=>{
