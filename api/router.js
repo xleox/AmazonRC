@@ -12,7 +12,13 @@ const 版本={
 let RcState="";
 let RcBusy=false;
 
-let doMission=[];
+let deliverMission={
+    url:"",
+    trackIDs:[{
+        "ID":"",
+        "trackID":""
+    }]
+};
 let readMission=[];
 /*readMission=[{
     url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=111-4667144-2665047',
@@ -61,7 +67,9 @@ router.get('/readMission',(req,res)=>{
     res.JSON(readMission);
 });
 var getBaseInf = function () {
-    setTimeout(()=>{chrome.quit()},120*1000);
+    if(RcBusy)return;
+    RcBusy=true;
+    setTimeout(()=>{chrome.quit();RcBusy=false;},120*1000);
     RcState="正在打开页面";
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
@@ -106,6 +114,7 @@ var getBaseInf = function () {
         .catch(err => {
             chrome.quit();
             console.log("登陆错误" , err);
+            RcBusy=false;
         });
     });
 }
