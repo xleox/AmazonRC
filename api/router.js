@@ -160,7 +160,7 @@ router.post('/sendItem',(req,res) => {
                 }
                 RcState = "登陆成功(发货)";
                 console.log("登陆成功(发货)", title);
-                chrome.
+                chrome.sendItems(sendItemsUrl,items);
 
             });
 
