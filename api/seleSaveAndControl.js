@@ -32,7 +32,7 @@ exports.amazonLogin = function (username,password) {
                                 记住框:'//*[@id="authportal-main-section"]/div[2]/div/div/form/div/div/div/div[3]/div/div/label/div/label/input',
                                 登陆按钮:'//*[@id="signInSubmit"]',
                                 选择账户:'//*[@id="ap-account-switcher-container"]/div[1]/div/div/div[2]/div[1]/div[2]/a/div/div[2]/div/div/div[2]'};
-                    sleep.msleep(1*1000); //实际用时延长
+                    sleep.msleep(10*1000); //实际用时延长
                     driver.findElements( By.xpath(xpaths.选择账户))
                         .then(doc => {if(doc.length != 0) driver.findElement(By.xpath(xpaths.选择账户)).click();});
 
@@ -110,6 +110,29 @@ exports.getOrderShippedPageHtml = function () {
                 });
         });
 }
+
+exports.sendItems = function (url, trackIDs) {
+    driver.get(url);
+    return driver.wait(()=> {
+        return driver.getTitle()
+            .then( title => {  //等待进入界面
+                //console.log(title.indexOf("亚马逊"));
+                if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
+                else return false;
+            } );}, 60000).then(title => {
+                console.log("准备发货");
+                let sendMission = [];
+                for(var i=0;i<trackIDs.length;i++){
+                    sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
+                }
+        Promise.all(sendMission)
+            .finally(()=>{
+                //driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
+            })
+
+    })
+}
+
 exports.getUrlHtml = function (url) {
     return driver.get(url).then(()=>{
         sleep.msleep(15*1000);
@@ -145,7 +168,6 @@ let inputTxtByXpath = function (xpath,v) {
                 return '';
         });
     }
-
 exports.accountInf=function () {
     return accountInf;
 }
