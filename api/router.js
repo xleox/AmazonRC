@@ -14,10 +14,7 @@ let RcBusy=false;
 
 let deliverMission={
     url:"",
-    trackIDs:[{
-        "ID":"",
-        "trackID":""
-    }]
+    items:[]
 };
 let readMission=[];
 /*readMission=[{
@@ -38,7 +35,16 @@ let addReadMission = function (url, saveFile) {
     readMission.push({url:url,saveFile:saveFile});
     return '添加成功';
 }
-
+let addDeliverMission = function (orderID, trackID) {
+    for(var i=0;i<deliverMission.items.length;i++){
+        if(deliverMission.items[i].orderID == orderID){
+            deliverMission.items[i].trackID = trackID;
+            return "该订单已存在，并修改";
+        }
+    }
+    deliverMission.items.push({orderID:orderID,trackID:trackID});
+    return '添加成功';
+}
 let readUrlThenSave=function (url,saveFile) {
     return chrome.getUrlHtml(url).then(
         html=>{
@@ -126,7 +132,35 @@ var getBaseInf = function () {
 
 getBaseInf();
 setInterval(()=>{getBaseInf()},600*1000);
+setInterval(()=>{sendItems()},30*1000);
 
+var sendItems=function () {
+    if(RcBusy)return;
+    if(deliverMission.items.length == 0)return;
+    RcBusy=true;
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},90*1000);
+
+    var orderIDs = "";
+    var items=deliverMission.items;
+    for(var i=0;i<items.length;i++)
+        orderIDs = orderIDs +  items[i].orderID + ";";
+    var sendItemsUrl = deliverMission.url + orderIDs;
+
+    RcState="正在打开页面(发货)";
+    chrome.amazonLogin(config.账户,config.密码)
+        .then(title => {
+            if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
+                RcState = "两步验证，需要协助登陆";
+                console.log("两步验证，需要协助登陆", title);
+                return title;
+            }
+            RcState = "登陆成功(发货)";
+            console.log("登陆成功(发货)", title);
+            chrome.sendItems(sendItemsUrl,items);
+            deliverMission.items=[];
+        });
+
+}
 router.get('/check',(req,res) => {
     res.send(chrome.accountInf());
 });
@@ -136,40 +170,20 @@ router.get('/order',(req,res) => {
     res.send("check please");
 });
 router.post('/sendItem',(req,res) => {
-    console.log(req.body.url);
-    console.log(req.body.items);
+    //console.log(req.body.url);
+    //console.log(req.body.items);
     if(req.body.url != undefined && req.body.items != undefined){
+        deliverMission.url=req.body.url;
         var items = JSON.parse(req.body.items);
-        var orderIDs = "";
+
         for(var i=0;i<items.length;i++)
-            orderIDs = orderIDs +  items[i].orderID + ";";
-        var sendItemsUrl = req.body.url + orderIDs
-
-        console.log(sendItemsUrl);
-
-        if(RcBusy)return;
-        RcBusy=true;
-        setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},90*1000);
-        RcState="正在打开页面(发货)";
-        chrome.amazonLogin(config.账户,config.密码)
-            .then(title => {
-                if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
-                    RcState = "两步验证，需要协助登陆";
-                    console.log("两步验证，需要协助登陆", title);
-                    return title;
-                }
-                RcState = "登陆成功(发货)";
-                console.log("登陆成功(发货)", title);
-                chrome.sendItems(sendItemsUrl,items);
-
-            });
-
+            addDeliverMission(items[i].orderID,items[i].trackID);
         res.send("ok");
     }else
         res.send("check please");
 });
 router.get('/state',(req,res) => {
-    res.send({"busy":RcBusy,"state":RcState});
+    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission});
 });
 
 module.exports = router;
