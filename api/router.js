@@ -6,9 +6,10 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.0.3',
+    代号:'2.0.0.4',
     名称:'牛刀'
 }
+const sleep = require('sleep');
 let RcState="";
 let RcBusy=false;
 
@@ -75,7 +76,7 @@ router.get('/readMission',(req,res)=>{
 var getBaseInf = function () {
     if(RcBusy)return;
     RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},120*1000);
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},140*1000);
     RcState="正在打开页面";
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
@@ -86,23 +87,25 @@ var getBaseInf = function () {
             }
             RcState="登陆成功";
             console.log("登陆成功" , title);
-
+            sleep.msleep(5*1000);
             chrome.getHomePageHtml().then(homeHtml=>{
                 RcState="读取首页信息";
                 return new Promise(function(resolve, reject){resolve(homeHtml);});
             }).then(homeHtml=>{
                 chrome.getOrderPageHtml().then(Orderhtml=>{
-                    //var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
-                    //fs.writeFileSync("./public/homeAndOrderPage.txt",homeHtml + Orderhtml + t);
                     RcState="读取未发货信息";
                     return new Promise(function(resolve, reject){resolve(homeHtml + Orderhtml);});
                 }).then(homeOrderHtml=>{
+                    chrome.getOrderCancelPageHtml().then(Cancelhtml=>{
+                        RcState="读取已取消信息";
+                        return new Promise(function(resolve, reject){resolve(homeOrderHtml + Cancelhtml);});
+                    }).then(homeOrderCancelHtml=>{
                     chrome.getOrderShippedPageHtml().then(ShipedOrderhtml=> {
                         var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
                         var v='<verNumber>'+版本.代号+'</verNumber>';
                         var n='<verName>'+版本.名称+'</verName>';
-                        fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderHtml + ShipedOrderhtml + t + v + n);
-                        RcState="读取已发货信息并保存";
+                        fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderCancelHtml + ShipedOrderhtml + t + v + n);
+                        RcState="读取已订单信息并保存";
                         if(readMission.length>0)
                         readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret=>{
                             RcState="完成第一个读取任务";
@@ -117,6 +120,7 @@ var getBaseInf = function () {
                                 });
                             });
 
+                    });
                     });
                 })
             });

@@ -110,7 +110,29 @@ exports.getOrderShippedPageHtml = function () {
                 });
         });
 }
+exports.getOrderCancelPageHtml = function () {
+    driver.manage().window().maximize();
+    //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
+    driver.get('https://sellercentral.amazon.com/orders-v3/mfn/canceled?ref_=xx_myo_dnav_xx&_encoding=UTF8&shipByDate=all&page=1&date-range=last-14');
+    return driver.getTitle()
+        .then( title => {  //等待进入界面
+            if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
+            else return false;
+        } , 60000).then(title => {
+            console.log('订单管理-已取消');
+            var xpaths={
+                进入新版本:'/html/body/div[5]/div/div[1]/table/tbody/tr/td/div[2]/a'};
+            driver.findElements( By.xpath(xpaths.进入新版本))
+                .then(doc => {if(doc.length != 0) driver.findElement(By.xpath(xpaths.进入新版本)).click();});
 
+            //查看订单数量
+            return driver.wait(until.elementLocated(By.xpath('//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]')), 10*1000)
+                .then(()=>{
+                    sleep.msleep(10*1000);
+                    return driver.getPageSource();
+                });
+        });
+}
 exports.sendItems = function (url, trackIDs) {
     driver.get(url);
     return driver.wait(()=> {
