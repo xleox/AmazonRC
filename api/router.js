@@ -6,7 +6,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.0.5',
+    代号:'2.0.5.1',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -71,7 +71,7 @@ router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
 });
 router.get('/readMission',(req,res)=>{
-    res.JSON(readMission);
+    res.send(readMission);
 });
 var getBaseInf = function () {
     if(RcBusy)return;
@@ -187,7 +187,7 @@ router.post('/sendItem',(req,res) => {
         res.send("check please");
 });
 router.get('/state',(req,res) => {
-    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission});
+    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission,"readMission":readMission});
 });
 
 module.exports = router;
