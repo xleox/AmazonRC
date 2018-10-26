@@ -5,17 +5,23 @@ const webdriver = require('selenium-webdriver'),
 const chrome = require('selenium-webdriver/chrome');
 const Promise = require("bluebird");
 const moment = require("moment");
+const config = require('./setting').config;
 
 let driver;
+let amazonHost="amazon.com";
+if(config.站点 != undefined)
+    amazonHost=config.站点;
 
 exports.amazonLogin = function (username,password) {
     var options = new chrome.Options();
-
-    options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
+    if(amazonHost=="amazon.com")
+        options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
+    else
+        options.addArguments("user-data-dir=C:\\Chrome\\"+amazonHost+"\\");
     //options.addArguments("user-data-dir=C:\\Users\\xleox-win10\\AppData\\Local\\Google\\Chrome\\User Data\\");
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
-    driver.get('http://sellercentral.amazon.com/gp/homepage.html');
+    driver.get('http://sellercentral.'+amazonHost+'/gp/homepage.html');
 
     return driver.wait(()=> {
         return driver.getTitle()
@@ -67,7 +73,7 @@ exports.getOrderPageHtml = function () {
     driver.manage().window().maximize();
     //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
     //driver.get('https://sellercentral.amazon.com/orders-v3/mfn/shipped?ref_=xx_myo_dnav_home&_encoding=UTF8&date-range=last-365&page=1');
-    driver.get('https://sellercentral.amazon.com/orders-v3/mfn/unshipped?ref_=xx_myo_dnav_home&_encoding=UTF8&page=1&date-range=last-14');
+    driver.get('https://sellercentral.'+amazonHost+'/orders-v3/mfn/unshipped?ref_=xx_myo_dnav_home&_encoding=UTF8&page=1&date-range=last-14');
     return driver.getTitle()
         .then( title => {  //等待进入界面
             if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
@@ -90,7 +96,7 @@ exports.getOrderPageHtml = function () {
 exports.getOrderShippedPageHtml = function () {
     driver.manage().window().maximize();
     //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
-    driver.get('https://sellercentral.amazon.com/orders-v3/mfn/shipped?ref_=xx_myo_dnav_xx&_encoding=UTF8&date-range=last-14&page=1');
+    driver.get('https://sellercentral.'+amazonHost+'/orders-v3/mfn/shipped?ref_=xx_myo_dnav_xx&_encoding=UTF8&date-range=last-14&page=1');
     return driver.getTitle()
         .then( title => {  //等待进入界面
             if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
@@ -113,7 +119,7 @@ exports.getOrderShippedPageHtml = function () {
 exports.getOrderCancelPageHtml = function () {
     driver.manage().window().maximize();
     //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
-    driver.get('https://sellercentral.amazon.com/orders-v3/mfn/canceled?ref_=xx_myo_dnav_xx&_encoding=UTF8&shipByDate=all&page=1&date-range=last-14');
+    driver.get('https://sellercentral.'+amazonHost+'/orders-v3/mfn/canceled?ref_=xx_myo_dnav_xx&_encoding=UTF8&shipByDate=all&page=1&date-range=last-14');
     return driver.getTitle()
         .then( title => {  //等待进入界面
             if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
