@@ -6,7 +6,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.5.1',
+    代号:'2.0.5.2',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -47,7 +47,7 @@ let addDeliverMission = function (orderID, trackID) {
     return '添加成功';
 }
 let readUrlThenSave=function (url,saveFile) {
-    return chrome.getUrlHtml(url.replace('amazon.com',amazonHost)).then(
+    return chrome.getUrlHtml(url).then(
         html=>{
             fs.writeFileSync("./public/"+saveFile+".txt",html);
             return new Promise(function(resolve, reject){resolve('done');});
