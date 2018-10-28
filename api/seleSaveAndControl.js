@@ -149,6 +149,7 @@ exports.sendItems = function (url, trackIDs) {
                 else return false;
             } );}, 60000).then(title => {
                 console.log("准备发货");
+                sleep.msleep(10*1000);
                 let sendMission = [];
                 for(var i=0;i<trackIDs.length;i++){
                     sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
