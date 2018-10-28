@@ -153,14 +153,34 @@ exports.sendItems = function (url, trackIDs) {
                 for(var i=0;i<trackIDs.length;i++){
                     sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
                 }
-        Promise.all(sendMission)
-            .finally(()=>{
-                driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
-            })
-
+            Promise.all(sendMission)
+                .finally(()=>{
+                    driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
+                })
+        })
+}
+exports.uploadListing = function (url, filePath) {
+    driver.get(url);
+    return driver.wait(()=> {
+        return driver.getTitle()
+            .then( title => {  //等待进入界面
+                if(title.indexOf("Upload") >= 0 || title.indexOf("上传商品") >= 0 ) return title;
+                else return false;
+            } );}, 60000).then(title => {
+        console.log("准备上传");
+        driver.findElement(By.xpath('//*[@id="a-autoid-4-announce"]/span')).click();
+        sleep.msleep(3*1000);
+        driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
+        sleep.msleep(2*1000);
+        driver.findElement(By.xpath('//*[@id="reportOutputColumn"]/span/div[1]/label/i')).click();
+        inputTxtByXpath('//*[@id="upload-form"]/table[1]/tbody/tr[3]/td/span/input',filePath).then(
+            ()=>{
+                driver.findElement(By.xpath('//*[@id="a-autoid-5"]/span/input')).click();
+                console.log("上传完成");
+            }
+        )
     })
 }
-
 exports.getUrlHtml = function (url) {
     return driver.get(url).then(()=>{
         sleep.msleep(15*1000);
@@ -172,7 +192,8 @@ exports.close=function () {
     driver.close();
 }
 exports.quit=function () {
-    driver.quit();
+    //console.log(driver);
+    if(driver != undefined)driver.quit();
 }
 
 

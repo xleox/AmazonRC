@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const chrome = require('./seleSaveAndControl');
 const moment = require('moment');
+const http = require('http');
 const fs = require('fs');
 const Promise = require("bluebird");
+const fsPromise=Promise.promisifyAll(require('fs'));
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.5.2',
+    代号:'2.0.6.0',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -16,6 +18,10 @@ let RcBusy=false;
 let deliverMission={
     url:"",
     items:[]
+};
+let uploadMission={
+    amzUrl:'https://sellercentral.amazon.com/listing/upload?ref_=xx_upload_tnav_status&language=zh_CN&languageSwitched=1',
+    listingUrl:'http://127.0.0.1:666/homeAndOrderPage.txt'
 };
 let readMission=[];
 /*readMission=[{
@@ -66,6 +72,22 @@ router.post('/addReadMisson',(req,res)=>{
         return;
     }
     res.send(addReadMission(req.body.url,req.body.saveFile));
+});
+router.post('/addUploadMission',(req,res)=>{
+    //console.log(req.body);
+    if(req.body.amzUrl == undefined || req.body.listingUrl == undefined)
+    {
+        res.send('格式错误');
+        return;
+    }
+    if(req.body.amzUrl == '' || req.body.listingUrl == '')
+    {
+        res.send('格式错误');
+        return;
+    }
+    uploadMission.amzUrl=req.body.amzUrl;
+    uploadMission.listingUrl=req.body.listingUrl;
+    res.send('ok');
 });
 router.get('/',(req,res)=>{
     res.send('Amazon Control Sever Start');
@@ -134,7 +156,7 @@ var getBaseInf = function () {
     });
 }
 
-getBaseInf();
+//getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()},600*1000);
 setInterval(()=>{sendItems()},30*1000);
 
@@ -165,10 +187,52 @@ var sendItems=function () {
         });
 
 }
-router.get('/check',(req,res) => {
-    res.send(chrome.accountInf());
-});
+var uploadListing=function () {
+    if(RcBusy)return;
+    if(uploadMission.amzUrl == '' || uploadMission.listingUrl == '' )return;
+    RcBusy=true;
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},100*1000);
 
+    /**
+     * 下载文件
+     * 。。。。
+     */
+    //console.log(moment().format("YYYY-MM-DD_hh-mm-ss"));
+    var listingName=moment().format("YYYY-MM-DD_hh-mm-ss")+".xls";
+    var listingPath=__dirname.replace('api','public\\'+listingName);
+    RcState="开始下载listing(上传产品)";
+    download(uploadMission.listingUrl,"./public/"+listingName,(function (ret) {
+        if(ret)
+        {
+            console.log(listingPath);
+            RcState="正在打开页面(上传产品)";
+            chrome.amazonLogin(config.账户,config.密码)
+                .then(title => {
+                    if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
+                        RcState = "两步验证，需要协助登陆";
+                        console.log("两步验证，需要协助登陆", title);
+                        return title;
+                    }
+                    RcState = "登陆成功(上传产品)";
+                    console.log("登陆成功(上传产品)", title);
+                    chrome.uploadListing(uploadMission.amzUrl,listingPath);
+                    uploadMission.listingUrl='';
+                });
+        }
+    }))
+    return;
+    //download(uploadMission.listingUrl,)
+
+
+}
+router.get('/quit',(req,res) => {
+    chrome.quit();
+    res.send("quit");
+});
+router.get('/upload',(req,res) => {
+    uploadListing();
+    res.send("uploadListing");
+});
 router.get('/order',(req,res) => {
     chrome.getOderInf();
     res.send("check please");
@@ -187,7 +251,18 @@ router.post('/sendItem',(req,res) => {
         res.send("check please");
 });
 router.get('/state',(req,res) => {
-    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission,"readMission":readMission});
+    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission,"readMission":readMission ,'uploadMission':uploadMission});
 });
-
+function download (url, dest, cb) {
+    var file = fs.createWriteStream(dest);
+    http.get(url, function(response) {
+            response.pipe(file);
+            file.on('finish', function() {
+                cb(true);  // close() is async, call cb after close completes.
+            });
+        }).on('error', function(err) { // Handle errors
+            fs.unlink(dest); // Delete the file async. (But we don't check the result)
+            cb(false);
+        });
+    };
 module.exports = router;
