@@ -220,10 +220,6 @@ var uploadListing=function () {
                 });
         }
     }))
-    return;
-    //download(uploadMission.listingUrl,)
-
-
 }
 router.get('/quit',(req,res) => {
     chrome.quit();
