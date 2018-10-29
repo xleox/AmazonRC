@@ -50,6 +50,7 @@ exports.amazonLogin = function (username,password) {
                                         .then( checked=>{if(!checked) driver.findElement(By.name("rememberMe")).click();
                                         });
                                 });
+                            sleep.msleep(2*1000); //实际用时延长
                             Promise.all(inputTxtByXpath(xpaths.用户名,username),inputTxtByXpath(xpaths.密码,password))
                                 .finally(()=>{
                                     driver.findElement(By.xpath(xpaths.登陆按钮)).click();
