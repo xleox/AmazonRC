@@ -8,7 +8,7 @@ const Promise = require("bluebird");
 const fsPromise=Promise.promisifyAll(require('fs'));
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.6.1',
+    代号:'2.0.6.2',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -20,8 +20,8 @@ let deliverMission={
     items:[]
 };
 let uploadMission={
-    amzUrl:'https://sellercentral.amazon.com/listing/upload?ref_=xx_upload_tnav_status&language=zh_CN&languageSwitched=1',
-    listingUrl:'http://127.0.0.1:666/homeAndOrderPage.txt'
+    amzUrl:'',
+    listingUrl:''
 };
 let readMission=[];
 /*readMission=[{
