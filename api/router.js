@@ -8,7 +8,7 @@ const Promise = require("bluebird");
 const fsPromise=Promise.promisifyAll(require('fs'));
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.6.3',
+    代号:'2.0.6.4',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -21,6 +21,7 @@ let deliverMission={
 };
 let uploadMission={
     amzUrl:'',
+    amzSite:'',
     listingUrl:''
 };
 let readMission=[];
@@ -85,6 +86,11 @@ router.post('/addUploadMission',(req,res)=>{
         res.send('格式错误');
         return;
     }
+    if(req.body.amzSite != undefined)
+        uploadMission.amzSite = req.body.amzSite;
+    else
+        uploadMission.amzSite = 'www.amazon.com';
+
     uploadMission.amzUrl=req.body.amzUrl;
     uploadMission.listingUrl=req.body.listingUrl;
     res.send('ok');
@@ -216,7 +222,7 @@ var uploadListing=function () {
                     }
                     RcState = "登陆成功(上传产品)";
                     console.log("登陆成功(上传产品)", title);
-                    chrome.uploadListing(uploadMission.amzUrl,listingPath);
+                    chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
                     uploadMission.listingUrl='';
                 });
         }

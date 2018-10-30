@@ -183,6 +183,15 @@ exports.uploadListing = function (url, filePath) {
         )
     })
 }
+exports.switchSite = function (amzSite) {
+    return driver.findElement(By.xpath('//*[@id="sc-mkt-picker-switcher-select"]')).click().then(
+        ()=>{
+            sleep.msleep(3*1000);
+            return driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
+        }
+    );
+
+}
 exports.getUrlHtml = function (url) {
     return driver.get(url).then(()=>{
         sleep.msleep(15*1000);
