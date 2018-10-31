@@ -5,15 +5,19 @@ const moment = require('moment');
 const http = require('http');
 const fs = require('fs');
 const Promise = require("bluebird");
-const fsPromise=Promise.promisifyAll(require('fs'));
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.6.4',
+    代号:'2.0.6.5',
     名称:'牛刀'
 }
 const sleep = require('sleep');
 let RcState="";
 let RcBusy=false;
+let merchantId='';  //用户在亚马逊的唯一标识之一 可以用来切换店铺
+let marketplaceId='';  //店铺ID
+let amazonHost="amazon.com";
+if(config.站点 != undefined)
+    amazonHost=config.站点;
 
 let deliverMission={
     url:"",
@@ -25,16 +29,6 @@ let uploadMission={
     listingUrl:''
 };
 let readMission=[];
-/*readMission=[{
-    url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=111-4667144-2665047',
-    saveFile:"111-4667144-2665047"
-},{
-    url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=113-8512576-6713068',
-    saveFile:"113-8512576-6713068"
-},{
-    url:'https://sellercentral.amazon.com/hz/orders/details?_encoding=UTF8&orderId=701-5241496-1581001',
-    saveFile:"701-5241496-1581001"
-}];*/
 let addReadMission = function (url, saveFile) {
     for(var i=0;i<readMission.length;i++){
         if(readMission[i].url == url && readMission[i].saveFile == saveFile)
@@ -115,9 +109,25 @@ var getBaseInf = function () {
             }
             RcState="登陆成功";
             console.log("登陆成功" , title);
-            sleep.msleep(5*1000);
+            sleep.msleep(6*1000);
             chrome.getHomePageHtml().then(homeHtml=>{
                 RcState="读取首页信息";
+                if(merchantId =='' || merchantId == '-')
+                    merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
+                marketplaceId=getTextByReg(homeHtml,/(?<=marketplaceID": ")(.*?)(?=")/g,0);
+                if(amazonHost == 'amazon.com' && marketplaceId !='ATVPDKIKX0DER')
+                {
+                    console.log('美国店铺首页不是美国站，正在跳转');
+                    RcState='美国店铺首页不是美国站，正在跳转';
+                    return chrome.getUrlHtml('https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=ATVPDKIKX0DER&merchantId=' + merchantId);
+                }
+                if(amazonHost == 'amazon.co.uk' && marketplaceId !='A1F83G8C2ARO7P')
+                {
+                    console.log('欧洲店铺首页不是英国站，正在跳转');
+                    RcState='欧洲店铺首页不是英国站，正在跳转';
+                    return chrome.getUrlHtml('https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=' + merchantId);
+                }
+                //console.log(marketplaceId,merchantId);
                 return new Promise(function(resolve, reject){resolve(homeHtml);});
             }).then(homeHtml=>{
                 chrome.getOrderPageHtml().then(Orderhtml=>{
@@ -198,8 +208,18 @@ var uploadListing=function () {
     if(RcBusy)return;
     if(uploadMission.amzUrl == '' || uploadMission.listingUrl == '' )return;
     RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},100*1000);
-
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},150*1000);
+    let marketID = {
+        'www.amazon.com':'ATVPDKIKX0DER',
+        'www.amazon.ca':'A2EUQ1WTGCTBG2',
+        'www.amazon.com.mx':'A1AM78C64UM0Y8',
+        'www.amazon.co.jp':'A1VC38T7YXB528',
+        'www.amazon.co.uk':'A1F83G8C2ARO7P',
+        'www.amazon.de':'A1PA6795UKMFR9',
+        'www.amazon.fr':'A13V1IB3VIYZZH',
+        'www.amazon.it':'APJ6JRA9NG5V4',
+        'www.amazon.es':'A1RKKUPIHCS9HS',
+    }
     /**
      * 下载文件
      * 。。。。
@@ -211,7 +231,7 @@ var uploadListing=function () {
     download(uploadMission.listingUrl,"./public/"+listingName,(function (ret) {
         if(ret)
         {
-            console.log(listingPath);
+            console.log('下载listing完成',listingPath);
             RcState="正在打开页面(上传产品)";
             chrome.amazonLogin(config.账户,config.密码)
                 .then(title => {
@@ -222,8 +242,25 @@ var uploadListing=function () {
                     }
                     RcState = "登陆成功(上传产品)";
                     console.log("登陆成功(上传产品)", title);
-                    chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
-                    uploadMission.listingUrl='';
+                    chrome.getHomePageHtml().then(homeHtml=>{
+                        if(merchantId =='' || merchantId == '-')
+                            merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
+                        marketplaceId=getTextByReg(homeHtml,/(?<=marketplaceID": ")(.*?)(?=")/g,0);
+                        if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
+                            return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
+                        else
+                            return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
+                    }).then(
+                        (ret)=>{
+                            if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceID": ")(.*?)(?=")/g,0))
+                            { //再次验证 看是否已经跳转
+                                RcState = "准备上传(上传产品)";
+                                console.log("准备上传(上传产品)", title);
+                                chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
+                                uploadMission.listingUrl='';
+                            }
+                        }
+                    )
                 });
         }
     }))
@@ -268,4 +305,18 @@ function download (url, dest, cb) {
             cb(false);
         });
     };
+/**
+ * 用正则表达式搜索字符
+ * @param text 正文
+ * @param reg 正则表达式
+ * @param i 第几个
+ * @returns {string}
+ */
+let getTextByReg=function (text,reg,i) {
+    let regMatch=text.match(reg);
+    if(regMatch != null)
+        if(regMatch[i] != undefined)
+            return regMatch[i];
+    return "-"
+};
 module.exports = router;

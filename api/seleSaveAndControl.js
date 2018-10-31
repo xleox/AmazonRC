@@ -177,7 +177,7 @@ exports.uploadListing = function (url, filePath) {
         driver.findElement(By.xpath('//*[@id="reportOutputColumn"]/span/div[1]/label/i')).click();
         inputTxtByXpath('//*[@id="upload-form"]/table[1]/tbody/tr[3]/td/span/input',filePath).then(
             ()=>{
-                driver.findElement(By.xpath('//*[@id="a-autoid-5"]/span/input')).click();
+                driver.findElement(By.xpath('//*[@id="upload-form"]/table[2]/tbody/tr/td/span[1]/span')).click();
                 console.log("上传完成");
             }
         )
@@ -197,7 +197,9 @@ exports.getUrlHtml = function (url) {
         sleep.msleep(15*1000);
         return driver.getPageSource();
     });
-
+}
+exports.onlyGet = function (url) {
+    driver.get(url);
 }
 exports.close=function () {
     driver.close();
