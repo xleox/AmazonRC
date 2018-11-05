@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.6.5',
+    代号:'2.0.6.6',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -185,11 +185,31 @@ var sendItems=function () {
 
     var orderIDs = "";
     var items=deliverMission.items;
+    var isHaveUSPS = false;
+
     for(var i=0;i<items.length;i++)
-        orderIDs = orderIDs +  items[i].orderID + ";";
+        if(items[i].trackID.length == 16)
+            {isHaveUSPS = true;break;}
+    if(isHaveUSPS)
+    {
+        var newDeliverMission = [];
+        for(var i=0;i<items.length;i++){
+            if(items[i].trackID.length == 16)
+                orderIDs = orderIDs +  items[i].orderID + ";";
+            else
+                newDeliverMission.push(items[i]);
+        }
+        deliverMission.items=newDeliverMission;  //不是USPS的订单摘录出来重新赋值
+    }else {
+        for(var i=0;i<items.length;i++)
+            orderIDs = orderIDs +  items[i].orderID + ";";
+        deliverMission.items=[];
+    }
+
     var sendItemsUrl = deliverMission.url + orderIDs;
 
     RcState="正在打开页面(发货)";
+    console.log("发货单号",orderIDs);
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
             if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
@@ -200,9 +220,7 @@ var sendItems=function () {
             RcState = "登陆成功(发货)";
             console.log("登陆成功(发货)", title);
             chrome.sendItems(sendItemsUrl,items);
-            deliverMission.items=[];
         });
-
 }
 var uploadListing=function () {
     if(RcBusy)return;

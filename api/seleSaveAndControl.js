@@ -150,7 +150,14 @@ exports.sendItems = function (url, trackIDs) {
                 else return false;
             } );}, 60000).then(title => {
                 console.log("准备发货");
-                sleep.msleep(10*1000);
+                sleep.msleep(8*1000);
+                driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click();
+                sleep.msleep(2*1000);
+                if(trackIDs[i].length == 16)
+                    driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="USPS"]')).click();
+                else
+                    driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="中国邮政"]')).click();
+                sleep.msleep(2*1000);
                 let sendMission = [];
                 for(var i=0;i<trackIDs.length;i++){
                     sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
