@@ -153,7 +153,7 @@ exports.sendItems = function (url, trackIDs) {
                 sleep.msleep(8*1000);
                 driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click();
                 sleep.msleep(2*1000);
-                if(trackIDs[i].length == 16)
+                if(trackIDs[0].lengths == 16)
                     driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="USPS"]')).click();
                 else
                     driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="中国邮政"]')).click();
