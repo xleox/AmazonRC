@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.6.7',
+    代号:'2.0.6.8',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -125,7 +125,7 @@ var getBaseInf = function () {
                 {
                     console.log('欧洲店铺首页不是英国站，正在跳转');
                     RcState='欧洲店铺首页不是英国站，正在跳转';
-                    return chrome.getUrlHtml('https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=' + merchantId);
+                    return chrome.getUrlHtml('https://sellercentral.amazon.co.uk/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=' + merchantId);
                 }
                 //console.log(marketplaceId,merchantId);
                 return new Promise(function(resolve, reject){resolve(homeHtml);});
