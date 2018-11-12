@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.6.8',
+    代号:'2.0.7.0',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -250,7 +250,7 @@ var uploadListing=function () {
         if(ret)
         {
             console.log('下载listing完成',listingPath);
-            RcState="正在打开页面(上传产品)";
+            RcState="正在打开页面(上传产品/申请转账)";
             chrome.amazonLogin(config.账户,config.密码)
                 .then(title => {
                     if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
@@ -258,8 +258,8 @@ var uploadListing=function () {
                         console.log("两步验证，需要协助登陆", title);
                         return title;
                     }
-                    RcState = "登陆成功(上传产品)";
-                    console.log("登陆成功(上传产品)", title);
+                    RcState = "登陆成功(上传产品/申请转账)";
+                    console.log("登陆成功(上传产品/申请转账)", title);
                     chrome.getHomePageHtml().then(homeHtml=>{
                         if(merchantId =='' || merchantId == '-')
                             merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
@@ -272,10 +272,19 @@ var uploadListing=function () {
                         (ret)=>{
                             if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceID": ")(.*?)(?=")/g,0))
                             { //再次验证 看是否已经跳转
-                                RcState = "准备上传(上传产品)";
-                                console.log("准备上传(上传产品)", title);
-                                chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
-                                uploadMission.listingUrl='';
+                                if(uploadMission.amzUrl.indexOf('/disburse/submit') == -1){ //判断是否申请转账 还是上传产品
+                                    RcState = "准备上传(上传产品)";
+                                    console.log("准备上传(上传产品)", title);
+                                    chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
+                                    uploadMission.listingUrl='';
+                                }else
+                                {
+                                    RcState = "申请转账";
+                                    console.log("申请转账", title);
+                                    chrome.onlyGet(uploadMission.amzUrl);
+                                    uploadMission.listingUrl='';
+                                }
+
                             }
                         }
                     )
