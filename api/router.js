@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.7.1',
+    代号:'2.0.7.2',
     名称:'牛刀'
 }
 const sleep = require('sleep');
