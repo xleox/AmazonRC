@@ -98,7 +98,7 @@ router.get('/readMission',(req,res)=>{
 var getBaseInf = function () {
     if(RcBusy)return;
     RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},140*1000);
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},360*1000);
     RcState="正在打开页面";
     chrome.amazonLogin(config.账户,config.密码)
         .then(title => {
