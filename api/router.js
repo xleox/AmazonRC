@@ -37,16 +37,7 @@ let addReadMission = function (url, saveFile) {
     readMission.push({url:url,saveFile:saveFile});
     return '添加成功';
 }
-let addDeliverMission = function (orderID, trackID) {
-    for(var i=0;i<deliverMission.items.length;i++){
-        if(deliverMission.items[i].orderID == orderID){
-            deliverMission.items[i].trackID = trackID;
-            return "该订单已存在，并修改";
-        }
-    }
-    deliverMission.items.push({orderID:orderID,trackID:trackID});
-    return '添加成功';
-}
+
 let readUrlThenSave=function (url,saveFile) {
     return chrome.getUrlHtml(url).then(
         html=>{
@@ -172,12 +163,57 @@ var getBaseInf = function () {
     });
 }
 
-getBaseInf();  //启动先打开。。。。。。。。。。
+//getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()},600*1000);
 setInterval(()=>{sendItems()},30*1000);
 setInterval(()=>{uploadListing()},35*1000);
-
 var sendItems=function () {
+    if(RcBusy)return;
+    if(deliverMission.items.length == 0)return;
+    RcBusy=true;
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},90*1000);
+
+    var orderIDs = "";
+    var nowItems=deliverMission.items;
+    var plan2SendItems=[];
+    var delItems=function (orderID) {
+        for(var i=0;i<nowItems.length;i++)
+            if(nowItems[i].orderID == orderID){
+                nowItems.splice(i,1);
+            }
+    }
+    var initSelectName=deliverMission.items[0].selectName , initCompanyName=deliverMission.items[0].companyName;
+    //把要发货的从系统发货数组里转移到计划里
+    for(var i=0;i<nowItems.length;i++)
+        if(nowItems[i].selectName == initSelectName && nowItems[i].companyName == initCompanyName){
+            orderIDs = orderIDs +  nowItems[i].orderID + ";";
+            plan2SendItems.push(nowItems[i]);
+        }
+    //把系统变量里的删除掉
+    for(var i=0;i<plan2SendItems.length;i++) delItems(plan2SendItems[i].orderID)
+
+    var sendItemsUrl = deliverMission.url + orderIDs;
+
+    /*console.log(orderIDs);
+    RcBusy=false;
+    console.log("计划发货",plan2SendItems);
+    console.log("剩余发货",deliverMission.items);*/
+
+    RcState="正在打开页面(发货)";
+    console.log("发货单号",orderIDs);
+    chrome.amazonLogin(config.账户,config.密码)
+        .then(title => {
+            if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
+                RcState = "两步验证，需要协助登陆";
+                console.log("两步验证，需要协助登陆", title);
+                return title;
+            }
+            RcState = "登陆成功(发货)";
+            console.log("登陆成功(发货)", title);
+            chrome.sendItems(sendItemsUrl,plan2SendItems);
+        });
+}
+/*var sendItems=function () {
     if(RcBusy)return;
     if(deliverMission.items.length == 0)return;
     RcBusy=true;
@@ -221,7 +257,7 @@ var sendItems=function () {
             console.log("登陆成功(发货)", title);
             chrome.sendItems(sendItemsUrl,items);
         });
-}
+}*/
 var uploadListing=function () {
     if(RcBusy)return;
     if(uploadMission.amzUrl == '' || uploadMission.listingUrl == '' )return;
@@ -304,6 +340,21 @@ router.get('/order',(req,res) => {
     chrome.getOderInf();
     res.send("check please");
 });
+router.get('/send',(req,res) => {
+    sendItems();
+    res.send("check please");
+});
+/*
+let addDeliverMission = function (orderID, trackID) {
+    for(var i=0;i<deliverMission.items.length;i++){
+        if(deliverMission.items[i].orderID == orderID){
+            deliverMission.items[i].trackID = trackID;
+            return "该订单已存在，并修改";
+        }
+    }
+    deliverMission.items.push({orderID:orderID,trackID:trackID});
+    return '添加成功';
+}
 router.post('/sendItem',(req,res) => {
     //console.log(req.body.url);
     //console.log(req.body.items);
@@ -313,6 +364,30 @@ router.post('/sendItem',(req,res) => {
 
         for(var i=0;i<items.length;i++)
             addDeliverMission(items[i].orderID,items[i].trackID);
+        res.send("ok");
+    }else
+        res.send("check please");
+});*/
+router.post('/sendItem',(req,res) => {
+    let isInDeliverMission = function (orderID) {
+        for(var i=0;i<deliverMission.items.length;i++)
+            if(deliverMission.items[i].orderID == orderID) return i;
+        return -1;
+    }
+    if(req.body.url != undefined && req.body.items != undefined){
+        deliverMission.url=req.body.url;
+        var items = JSON.parse(req.body.items);
+
+        for(var i=0;i<items.length;i++)
+            if(isInDeliverMission(items[i].orderID)==-1){
+                deliverMission.items.push({orderID:items[i].orderID,trackID:items[i].trackID,
+                    selectName:items[i].selectName,companyName:items[i].companyName});
+            }else{
+                deliverMission.items[i].trackID = items[i].trackID;
+                deliverMission.items[i].selectName = items[i].selectName;
+                deliverMission.items[i].companyName = items[i].companyName;
+            }
+        //console.log(deliverMission);
         res.send("ok");
     }else
         res.send("check please");
