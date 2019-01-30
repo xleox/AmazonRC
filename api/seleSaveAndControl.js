@@ -158,9 +158,9 @@ exports.sendItems = function (url, trackIDs) {
                 else{
                     driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
                     sleep.msleep(2*1000);
-                    driver.findElement(By.xpath('//input[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
+                    driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
                     sleep.msleep(2*1000);
-                    inputTxtByXpath('//input[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].selectName)
+                    inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName)
                     //driver.findElement(By.xpath('//input[@id="carrierName_UNSHIPPEDITEMS"]')).setAttribute("value", trackIDs[0].selectName);
                 }
                 sleep.msleep(2*1000);
