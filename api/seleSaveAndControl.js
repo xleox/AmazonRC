@@ -157,23 +157,24 @@ exports.sendItems = function (url, trackIDs) {
                             return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                         else{
                             sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
-                            driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
+                            return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
                                 .then(ret=>{
                                     console.log("1");
-                                    driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
+                                    return driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
                                 });
-                        }
-                        }
-                    );
-                sleep.msleep(2*1000);
-                let sendMission = [];
-                for(var i=0;i<trackIDs.length;i++){
-                    sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
-                }
-            Promise.all(sendMission)
-                .finally(()=>{
-                    ////////driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
-                })
+                            }
+                    }).then(ret=>{
+                            sleep.msleep(2*1000);
+                            let sendMission = [];
+                            for(var i=0;i<trackIDs.length;i++){
+                                sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
+                            }
+                            Promise.all(sendMission)
+                                .finally(()=>{
+                                    ////////driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
+                                })
+                        });
+
         })
 }
 exports.uploadListing = function (url, filePath) {
