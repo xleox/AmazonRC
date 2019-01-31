@@ -157,11 +157,7 @@ exports.sendItems = function (url, trackIDs) {
                             return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                         else{
                             sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
-                            return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
-                                .then(ret=>{
-                                    console.log("1");
-                                    return driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
-                                });
+                            driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
                             }
                     }).then(ret=>{
                             sleep.msleep(2*1000);
@@ -240,7 +236,11 @@ let inputTxtByXpath = function (xpath,v) {
                         if(value == "")
                             return driver.findElement(By.xpath(xpath)).sendKeys(v);
                         else
-                            return "";
+                            return driver.findElement(By.xpath(xpath)).clear()
+                                .then(doc=>{
+                                    sleep.msleep(1*1000);
+                                    return driver.findElement(By.xpath(xpath)).sendKeys(v);
+                                });
                     });
             else
                 return '';
