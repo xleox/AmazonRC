@@ -157,12 +157,13 @@ exports.sendItems = function (url, trackIDs) {
                         if(trackIDs[0].selectName != "其他")
                             return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                         else{
-                            driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
+                            return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
                             }
                     }).then(ret=>{
                             sleep.msleep(2*1000);
                             let sendMission = [];
-                            sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
+                            if(trackIDs[0].selectName != "其他")
+                                sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
                             for(var i=0;i<trackIDs.length;i++){
                                 sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
                             }
@@ -237,12 +238,14 @@ let inputTxtByXpath = function (xpath,v) {
                     .then(value=>{
                         if(value == "")
                             return driver.findElement(By.xpath(xpath)).sendKeys(v);
-                        else
+                        else if(xpath == '//*[@id="carrierName_UNSHIPPEDITEMS"]')
                             return driver.findElement(By.xpath(xpath)).clear()
                                 .then(doc=>{
                                     sleep.msleep(1*1000);
                                     return driver.findElement(By.xpath(xpath)).sendKeys(v);
                                 });
+                        else
+                            return ""
                     });
             else
                 return '';
