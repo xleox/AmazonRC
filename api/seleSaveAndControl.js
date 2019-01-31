@@ -156,14 +156,14 @@ exports.sendItems = function (url, trackIDs) {
                 if(trackIDs[0].selectName != "其他")
                     driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                 else{
-                    driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
-                    sleep.msleep(2*1000);
-                    //driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).click();
-                    //driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
-                    driver.findElement(By.name('carrierName_UNSHIPPEDITEMS')).clear();
-                    sleep.msleep(2*1000);
-                    inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName);
-                    //driver.findElement(By.xpath('//input[@id="carrierName_UNSHIPPEDITEMS"]')).setAttribute("value", trackIDs[0].selectName);
+                    driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
+                        .then(ret=>{
+                            sleep.msleep(2*1000);
+                            return driver.findElement(By.name('carrierName_UNSHIPPEDITEMS')).clear();
+                        }).then(ret=>{
+                            sleep.msleep(1*1000);
+                            inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName);
+                    });
                 }
                 sleep.msleep(2*1000);
                 let sendMission = [];
