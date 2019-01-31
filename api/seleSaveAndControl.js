@@ -156,6 +156,7 @@ exports.sendItems = function (url, trackIDs) {
                 if(trackIDs[0].selectName != "其他")
                     driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                 else{
+                    driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
                     driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
                         .then(ret=>{
                             sleep.msleep(2*1000);
