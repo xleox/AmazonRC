@@ -232,7 +232,7 @@ let inputTxtByXpath = function (xpath,v) {
         .then(doc => {
             if (doc.length != 0)
                 return driver.findElement(By.xpath(xpath)).getAttribute("value")
-                    .then(value=>{
+                    .then(value=>{return driver.findElement(By.xpath(xpath)).sendKeys(v);
                         if(value == "")
                             return driver.findElement(By.xpath(xpath)).sendKeys(v);
                         else
