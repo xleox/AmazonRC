@@ -150,6 +150,7 @@ exports.sendItems = function (url, trackIDs) {
                 else return false;
             } );}, 60000).then(title => {
                 console.log("准备发货");
+                let sendMission = [];
                 sleep.msleep(8*1000);
                 driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
                     .then(ret=>{
@@ -161,7 +162,6 @@ exports.sendItems = function (url, trackIDs) {
                             }
                     }).then(ret=>{
                             sleep.msleep(2*1000);
-                            let sendMission = [];
                             for(var i=0;i<trackIDs.length;i++){
                                 sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
                             }
