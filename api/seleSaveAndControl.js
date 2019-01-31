@@ -150,18 +150,19 @@ exports.sendItems = function (url, trackIDs) {
                 else return false;
             } );}, 60000).then(title => {
                 console.log("准备发货");
-                let sendMission = [];
+
                 sleep.msleep(8*1000);
                 driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
                     .then(ret=>{
                         if(trackIDs[0].selectName != "其他")
                             return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                         else{
-                            sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
                             driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
                             }
                     }).then(ret=>{
                             sleep.msleep(2*1000);
+                            let sendMission = [];
+                            sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
                             for(var i=0;i<trackIDs.length;i++){
                                 sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
                             }
