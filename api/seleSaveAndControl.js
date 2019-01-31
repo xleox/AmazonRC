@@ -168,7 +168,7 @@ exports.sendItems = function (url, trackIDs) {
                             }
                             Promise.all(sendMission)
                                 .finally(()=>{
-                                    ////////driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
+                                    driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
                                 })
                         });
 
@@ -229,7 +229,7 @@ exports.quit=function () {
  * @returns {Promise<Array<WebElement>>}
  */
 let inputTxtByXpath = function (xpath,v) {
-    console.log(xpath);
+    //console.log(xpath);
     return driver.findElements( By.xpath(xpath) )
         .then(doc => {
             if (doc.length != 0)
