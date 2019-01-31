@@ -151,21 +151,20 @@ exports.sendItems = function (url, trackIDs) {
             } );}, 60000).then(title => {
                 console.log("准备发货");
                 sleep.msleep(8*1000);
-                driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click();
-                sleep.msleep(2*1000);
-                if(trackIDs[0].selectName != "其他")
-                    driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
-                else{
-                    driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
-                    driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
-                        .then(ret=>{
-                            sleep.msleep(2*1000);
-                            return driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
-                        }).then(ret=>{
-                            sleep.msleep(1*1000);
-                            inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName);
-                    });
-                }
+                driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
+                    .then(ret=>{
+                        if(trackIDs[0].selectName != "其他")
+                            return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
+                        else{
+                            sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
+                            driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click()
+                                .then(ret=>{
+                                    console.log("1");
+                                    driver.findElement(By.xpath('//*[@id="carrierName_UNSHIPPEDITEMS"]')).clear();
+                                });
+                        }
+                        }
+                    );
                 sleep.msleep(2*1000);
                 let sendMission = [];
                 for(var i=0;i<trackIDs.length;i++){
