@@ -228,11 +228,12 @@ exports.quit=function () {
  * @returns {Promise<Array<WebElement>>}
  */
 let inputTxtByXpath = function (xpath,v) {
+    console.log(xpath);
     return driver.findElements( By.xpath(xpath) )
         .then(doc => {
             if (doc.length != 0)
                 return driver.findElement(By.xpath(xpath)).getAttribute("value")
-                    .then(value=>{return driver.findElement(By.xpath(xpath)).sendKeys(v);
+                    .then(value=>{
                         if(value == "")
                             return driver.findElement(By.xpath(xpath)).sendKeys(v);
                         else
