@@ -150,16 +150,15 @@ exports.sendItems = function (url, trackIDs) {
                 else return false;
             } );}, 60000).then(title => {
                 console.log("准备发货");
-
                 sleep.msleep(8*1000);
                 driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
-                    .then(ret=>{
+                    .then(ret=>{//select
                         if(trackIDs[0].selectName != "其他")
                             return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                         else{
                             return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
                             }
-                    }).then(ret=>{
+                    }).then(ret=>{//input
                             sleep.msleep(2*1000);
                             let sendMission = [];
                             if(trackIDs[0].selectName != "其他")
