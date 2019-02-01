@@ -161,7 +161,7 @@ exports.sendItems = function (url, trackIDs) {
                     }).then(ret=>{//input
                             sleep.msleep(2*1000);
                             let sendMission = [];
-                            if(trackIDs[0].selectName != "其他")
+                            if(trackIDs[0].selectName == "其他")
                                 sendMission.push(inputTxtByXpath('//*[@id="carrierName_UNSHIPPEDITEMS"]',trackIDs[0].companyName));
                             for(var i=0;i<trackIDs.length;i++){
                                 sendMission.push(inputTxtByXpath('//*[@id="trackingID_'+trackIDs[i].orderID+'"]',trackIDs[i].trackID))
