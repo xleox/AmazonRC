@@ -160,7 +160,7 @@ exports.sendItems = function (url, trackIDs) {
                                     /*if(trackIDs[0].selectName != "其他")
                                         return driver.findElement(By.xpath('//!*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/select/option['+trackIDs[0].selectName+'"]')).click();
                                     else{*/
-                                        return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), \''+ trackIDs[0].selectName +' \')]/a')).click();
+                                        return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
                                     //}
                                 }
                             )
