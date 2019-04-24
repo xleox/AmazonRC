@@ -154,18 +154,18 @@ exports.sendItems = function (url, trackIDs) {
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
                         //新版发货
-                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/span/span/span/span')).click()
+                        //driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/span/span/span/span')).click()
+                        driver.findElement(By.xpath('//!*[@id="dropdown1_7"]')).click()
                         //driver.findElement(By.name('CarrierListDropdown--1')).click()
-
-                            .then(
+                            /*.then(
                                 ret=>{
-                                    /*if(trackIDs[0].selectName != "其他")
+                                    /!*if(trackIDs[0].selectName != "其他")
                                         return driver.findElement(By.xpath('//!*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/select/option['+trackIDs[0].selectName+'"]')).click();
-                                    else{*/
-                                        return driver.findElement(By.xpath('//*[@id="dropdown1_7"]')).click();
+                                    else{*!/
+                                        return driver.findElement(By.xpath('//!*[@id="dropdown1_7"]')).click();
                                     //}
                                 }
-                            )
+                            )*/
                     }else {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
