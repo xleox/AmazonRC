@@ -154,7 +154,7 @@ exports.sendItems = function (url, trackIDs) {
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
                         //新版发货
-                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[1]')).click()
+                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/span/span/span/span')).click()
                     }else {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
