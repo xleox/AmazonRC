@@ -175,10 +175,10 @@ exports.sendItems = function (url, trackIDs) {
                             for(var i=0;i<trackIDs.length;i++){
                                 sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input',trackIDs[i].trackID));
                             }
-                            /*Promise.all(sendMission)
+                            Promise.all(sendMission)
                                 .finally(()=>{
-                                    driver.findElement(By.xpath('//!*[@id="myo-cms-confirm"]/span')).click();
-                                })*/
+                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                                })
                                     });
                     }else {
                         //旧版发货
