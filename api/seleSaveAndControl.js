@@ -150,16 +150,21 @@ exports.sendItems = function (url, trackIDs) {
             } );}, 60000).then(title => {
                 console.log("准备发货");
                 sleep.msleep(8*1000);
-                driver.getCurrentUrl().then(ret=>{console.log(ret)});
-
-                driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
-                    .then(ret=>{//select
-                        if(trackIDs[0].selectName != "其他")
-                            return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
-                        else{
-                            return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
-                            }
-                    }).then(ret=>{//input
+                driver.getCurrentUrl().then(currentUrl=>{
+                    console.log(currentUrl);
+                    if(currentUrl.indexOf("orders-v3") > 0){
+                        //新版发货
+                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[1]')).click()
+                    }else {
+                        //旧版发货
+                        driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
+                            .then(ret=>{//select
+                                if(trackIDs[0].selectName != "其他")
+                                    return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
+                                else{
+                                    return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
+                                }
+                            }).then(ret=>{//input
                             sleep.msleep(2*1000);
                             let sendMission = [];
                             if(trackIDs[0].selectName == "其他")
@@ -172,6 +177,10 @@ exports.sendItems = function (url, trackIDs) {
                                     driver.findElement(By.xpath('//*[@id="myo-cms-confirm"]/span')).click();
                                 })
                         });
+                    }
+                });
+
+
 
         })
 }
