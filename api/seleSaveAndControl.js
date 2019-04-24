@@ -150,7 +150,7 @@ exports.sendItems = function (url, trackIDs) {
             } );}, 60000).then(title => {
                 console.log("准备发货");
                 sleep.msleep(8*1000);
-                driver.current_url().then(ret=>{console.log(ret)});
+                driver.getCurrentUrl().then(ret=>{console.log(ret)});
 
                 driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
                     .then(ret=>{//select
