@@ -41,8 +41,6 @@ exports.amazonLogin = function (username,password) {
                     sleep.msleep(10*1000); //实际用时延长
                     driver.findElements( By.xpath(xpaths.选择账户))
                         .then(doc => {if(doc.length != 0) driver.findElement(By.xpath(xpaths.选择账户)).click();});
-                    if(driver.current_url != undefined)
-                        console.log(driver.current_url);
                     driver.wait(until.elementLocated(By.xpath(xpaths.登陆按钮)), 60*1000)
                         .then(()=>{
                             driver.findElements( By.name("rememberMe"))
@@ -152,7 +150,8 @@ exports.sendItems = function (url, trackIDs) {
             } );}, 60000).then(title => {
                 console.log("准备发货");
                 sleep.msleep(8*1000);
-
+                if(driver.current_url != undefined)
+                    console.log(driver.current_url);
                 driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
                     .then(ret=>{//select
                         if(trackIDs[0].selectName != "其他")
