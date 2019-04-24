@@ -159,22 +159,22 @@ exports.sendItems = function (url, trackIDs) {
 
                             .then(
                                 ret=>{
-                                    if(trackIDs[0].selectName != "其他")
-                                        return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/select/option['+trackIDs[0].selectName+'"]')).click();
-                                    else{
-                                        return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/select/option['+trackIDs[0].selectName+'"]')).click();
-                                    }
+                                    /*if(trackIDs[0].selectName != "其他")
+                                        return driver.findElement(By.xpath('//!*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/select/option['+trackIDs[0].selectName+'"]')).click();
+                                    else{*/
+                                        return driver.findElement(By.xpath('//*[@id="dropdown1_7"]')).click();
+                                    //}
                                 }
                             )
                     }else {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
                             .then(ret=>{//select
-                                /*if(trackIDs[0].selectName != "其他")
-                                    return driver.findElement(By.xpath('//!*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
-                                else{*/
-                                    return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[27]')).click();
-                                //}
+                                if(trackIDs[0].selectName != "其他")
+                                    return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
+                                else{
+                                    return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
+                                }
                             }).then(ret=>{//input
                             sleep.msleep(2*1000);
                             let sendMission = [];
