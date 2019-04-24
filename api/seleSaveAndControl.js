@@ -173,7 +173,7 @@ exports.sendItems = function (url, trackIDs) {
                                 /*if(trackIDs[0].selectName != "其他")
                                     return driver.findElement(By.xpath('//!*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
                                 else{*/
-                                    return driver.findElement(By.xpath('//*[@id="dropdown1_4"]')).click();
+                                    return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[27]')).click();
                                 //}
                             }).then(ret=>{//input
                             sleep.msleep(2*1000);
