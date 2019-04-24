@@ -170,11 +170,11 @@ exports.sendItems = function (url, trackIDs) {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
                             .then(ret=>{//select
-                                if(trackIDs[0].selectName != "其他")
-                                    return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
-                                else{
-                                    return driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="Other"]')).click();
-                                }
+                                /*if(trackIDs[0].selectName != "其他")
+                                    return driver.findElement(By.xpath('//!*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]/option[@value="'+trackIDs[0].selectName+'"]')).click();
+                                else{*/
+                                    return driver.findElement(By.xpath('//*[@id="dropdown1_4"]')).click();
+                                //}
                             }).then(ret=>{//input
                             sleep.msleep(2*1000);
                             let sendMission = [];
