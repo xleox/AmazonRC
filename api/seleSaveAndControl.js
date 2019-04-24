@@ -167,7 +167,19 @@ exports.sendItems = function (url, trackIDs) {
                                         return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
                                     }
                                 }
-                            )
+                            ).then(ret=>{
+                            sleep.msleep(2*1000);
+                            let sendMission = [];
+                            if(trackIDs[0].selectName == "其他")
+                                sendMission.push(inputTxtByXpath('//*[@id="customCarrierInput--1"]',trackIDs[0].companyName));
+                            for(var i=0;i<trackIDs.length;i++){
+                                sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input',trackIDs[i].trackID));
+                            }
+                            /*Promise.all(sendMission)
+                                .finally(()=>{
+                                    driver.findElement(By.xpath('//!*[@id="myo-cms-confirm"]/span')).click();
+                                })*/
+                                    });
                     }else {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()

@@ -171,7 +171,7 @@ var sendItems=function () {
     if(RcBusy)return;
     if(deliverMission.items.length == 0)return;
     RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},90*1000);
+    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},120*1000);
 
     var orderIDs = "";
     var nowItems=deliverMission.items;
