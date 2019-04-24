@@ -157,11 +157,15 @@ exports.sendItems = function (url, trackIDs) {
                         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/span/span/span/span')).click()
                             .then(
                                 ret=>{
-                                    /*if(trackIDs[0].selectName != "其他")
-                                        return driver.findElement(By.xpath('//!*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/select/option['+trackIDs[0].selectName+'"]')).click();
-                                    else{*/
+                                    if(trackIDs[0].selectName != "其他")
                                         return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
-                                    //}
+                                    else{
+                                        driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                                        sleep.msleep(1*1000);
+                                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/span[2]/span/span/span/span')).click();
+                                        sleep.msleep(1*1000);
+                                        return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
+                                    }
                                 }
                             )
                     }else {
