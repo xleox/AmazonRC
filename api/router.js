@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.8.3',
+    代号:'2.0.8.4',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -313,12 +313,28 @@ var uploadListing=function () {
                                     console.log("准备上传(上传产品)", title);
                                     chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
                                     uploadMission.listingUrl='';
-                                }else
-                                {
+                                }else {
                                     RcState = "申请转账";
                                     console.log("申请转账", title);
-                                    chrome.onlyGet(uploadMission.amzUrl);
-                                    uploadMission.listingUrl='';
+                                    chrome.getUrlHtml(uploadMission.amzUrl).then(html => {
+                                        let datetime = moment().format('YYYY-MM-DD HH:mm:ss');
+                                        let withdrawHtml = html.replace(/\t|\n|\r|\s/g, "");
+                                        withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currencyUSD">)(.*?)(?=<\/span><br>)/g);
+                                        let transferAmount = "";
+                                        if (withdrawHtml !== null) {
+                                            transferAmount = withdrawHtml[0];
+                                        } else {
+                                            transferAmount = "";
+                                        }
+                                        let saveObj = {
+                                            "转账时间": datetime,
+                                            "转账站点": amazonHost,
+                                            "转账金额": transferAmount
+                                        };
+                                        fs.writeFileSync("./public/withdraw.txt", saveObj);
+                                        uploadMission.listingUrl='';
+                                        return new Promise(function(resolve, reject){resolve('done');});
+                                    });
                                 }
 
                             }
