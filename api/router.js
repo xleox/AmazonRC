@@ -331,7 +331,7 @@ var uploadListing=function () {
                                             "转账站点": amazonHost,
                                             "转账金额": transferAmount
                                         };
-                                        fs.writeFileSync("./public/withdraw.txt", saveObj);
+                                        fs.writeFileSync("./public/withdraw.txt", "" + saveObj);
                                         uploadMission.listingUrl='';
                                         return new Promise(function(resolve, reject){resolve('done');});
                                     });
