@@ -326,8 +326,9 @@ var uploadListing=function () {
                                         } else {
                                             transferAmount = "-";
                                         }
-                                        let saveInfo = "{'转账时间': " + datetime + ", '转账站点': " + amazonHost + ", '转账金额': " + transferAmount + "}";
-                                        fs.writeFileSync("./public/withdraw.txt", saveInfo);
+                                        let options = {flag: "a+"};
+                                        let saveInfo = "{'转账时间': " + datetime + ", '转账站点': " + amazonHost + ", '转账金额': " + transferAmount + "}\n";
+                                        fs.writeFileSync("./public/withdraw.txt", saveInfo, options);
                                         uploadMission.listingUrl='';
                                         return new Promise(function(resolve, reject){resolve('done');});
                                     });
