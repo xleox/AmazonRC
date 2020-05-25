@@ -324,7 +324,7 @@ var uploadListing=function () {
                                         if (withdrawHtml !== null) {
                                             transferAmount = withdrawHtml[0];
                                         } else {
-                                            transferAmount = "";
+                                            transferAmount = "-";
                                         }
                                         let saveInfo = "{'转账时间': " + datetime + ", '转账站点': " + amazonHost + ", '转账金额': " + transferAmount + "}";
                                         fs.writeFileSync("./public/withdraw.txt", saveInfo);
