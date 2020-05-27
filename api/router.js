@@ -319,7 +319,7 @@ var uploadListing=function () {
                                     chrome.getUrlHtml(uploadMission.amzUrl).then(html => {
                                         let datetime = moment().format('YYYY-MM-DD HH:mm:ss');
                                         let withdrawHtml = html.replace(/\t|\n|\r|\s/g, "");
-                                        withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currencyUSD">)(.*?)(?=<\/span><br>)/g);
+                                        withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currencyUSD">)(.*?)(?=<\/span>)/g);
                                         let transferAmount = "";
                                         if (withdrawHtml !== null) {
                                             transferAmount = withdrawHtml[0];
