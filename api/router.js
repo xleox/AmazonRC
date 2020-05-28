@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.8.4',
+    代号:'2.0.8.5',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -273,6 +273,7 @@ var uploadListing=function () {
         'www.amazon.fr':'A13V1IB3VIYZZH',
         'www.amazon.it':'APJ6JRA9NG5V4',
         'www.amazon.es':'A1RKKUPIHCS9HS',
+        'www.amazon.com.au':'A39IBJ37TRP1C6'
     }
     /**
      * 下载文件
@@ -319,7 +320,7 @@ var uploadListing=function () {
                                     chrome.getUrlHtml(uploadMission.amzUrl).then(html => {
                                         let datetime = moment().format('YYYY-MM-DD HH:mm:ss');
                                         let withdrawHtml = html.replace(/\t|\n|\r|\s/g, "");
-                                        withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currencyUSD">)(.*?)(?=<\/span>)/g);
+                                        withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currency.*?">)(.*?)(?=<\/span>)/g);
                                         let transferAmount = "";
                                         if (withdrawHtml !== null) {
                                             transferAmount = withdrawHtml[0];
