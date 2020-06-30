@@ -219,7 +219,7 @@ exports.uploadListing = function (url, filePath) {
                 else return false;
             } );}, 60000).then(title => {
         console.log("准备上传");
-        driver.findElement(By.xpath('//*[@id="a-autoid-4-announce"]/span')).click();
+        driver.findElement(By.xpath('//*[@id="a-autoid-2-announce"]/span')).click();
         sleep.msleep(3*1000);
         driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
         sleep.msleep(2*1000);
