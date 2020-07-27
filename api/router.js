@@ -301,10 +301,18 @@ var uploadListing=function () {
                         if(merchantId =='' || merchantId == '-')
                             merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
                         marketplaceId=getTextByReg(homeHtml,/(?<=marketplaceID": ")(.*?)(?=")/g,0);
-                        if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
-                            return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
-                        else
-                            return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
+                        marketplaceId = marketplaceId.replace(/\s/g, "");
+                        if (marketplaceId !== "-") {
+                            if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
+                                return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
+                            else
+                                return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
+                        } else {
+                            console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
+                            chrome.quit();
+                            uploadMission.listingUrl='';
+                            return marketplaceId;
+                        }
                     }).then(
                         (ret)=>{
                             if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceID": ")(.*?)(?=")/g,0))
@@ -338,7 +346,11 @@ var uploadListing=function () {
                             }
                         }
                     )
-                });
+                }).catch(err => {
+                chrome.quit();
+                console.log("上传产品/申请转账 出错" , err);
+                uploadMission.listingUrl='';
+            });
         }
     }))
 }
