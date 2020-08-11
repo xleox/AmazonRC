@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.8.7',
+    代号:'2.0.8.6',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -301,21 +301,24 @@ var uploadListing=function () {
                         if(merchantId =='' || merchantId == '-')
                             merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
                         marketplaceId=getTextByReg(homeHtml,/(?<=marketplaceID": ")(.*?)(?=")/g,0);
-                        if (marketplaceId !== "-") {
+                        if (uploadMission.amzUrl.indexOf('/disburse/submit') !== -1) {
+                            if (marketplaceId !== "-") {
+                                if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
+                                    return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
+                                else
+                                    return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
+                            } else {
+                                console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
+                                chrome.quit();
+                                uploadMission.listingUrl='';
+                                return marketplaceId;
+                            }
+                        } else {
                             if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
                                 return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
                             else
                                 return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
-                        } else {
-                            console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
-                            chrome.quit();
-                            uploadMission.listingUrl='';
-                            return marketplaceId;
                         }
-                        // if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
-                        //     return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
-                        // else
-                        //     return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
                     }).then(
                         (ret)=>{
                             if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceID": ")(.*?)(?=")/g,0))
