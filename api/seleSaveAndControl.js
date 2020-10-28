@@ -244,7 +244,14 @@ exports.switchSite = function (amzSite) {
 exports.getUrlHtml = function (url) {
     return driver.get(url).then(()=>{
         sleep.msleep(15*1000);
-        return driver.getPageSource();
+        if (url.match(/\/inventory\//g) !== null) {
+            return driver.findElement(By.xpath('//*[@id="FULFILLMENT_SECTION"]/ul/li[3]/div/span/div/label/input[@value="FulfilledByAmazon"]')).click().then(()=>{
+                sleep.msleep(15*1000);
+                return driver.getPageSource();
+            });
+        } else {
+            return driver.getPageSource();
+        }
     });
 }
 exports.onlyGet = function (url) {
