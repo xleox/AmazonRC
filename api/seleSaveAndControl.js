@@ -146,7 +146,7 @@ exports.getInventoryPageHtml = function () {
     return driver.get('https://sellercentral.'+amazonHost+'/inventory/ref=xx_invmgr_dnav_xx').then(()=>{
         sleep.msleep(15*1000);
         return driver.findElement(By.xpath('//*[@id="FULFILLMENT_SECTION"]/ul/li[3]/div/span/div/label/input[@value="FulfilledByAmazon"]')).click().then(()=>{
-            return driver.findElement(By.xpath('//*[@id="myitable"]/div[6]/div[3]/div/span/span/select')).click().then(()=>{
+            return driver.findElement(By.xpath('//*[@id="a-autoid-44"]')).click().then(()=>{
                 return driver.findElement(By.xpath('//*[@id="myitable-250-rpp"]')).click().then(()=>{
                     sleep.msleep(15*1000);
                     return driver.getPageSource();
