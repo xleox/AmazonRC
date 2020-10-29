@@ -135,6 +135,11 @@ var getBaseInf = function () {
                         var n='<verName>'+版本.名称+'</verName>';
                         fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderCancelHtml + ShipedOrderhtml + t + v + n);
                         RcState="读取已订单信息并保存";
+                        if (config["FBA"] === '有') {
+                            chrome.getInventoryPageHtml().then(InventoryHtml => {
+                                fs.writeFileSync("./public/FbaInventory.txt", InventoryHtml + t);
+                            })
+                        }
                         if(readMission.length>0)
                         readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret=>{
                             RcState="完成第一个读取任务";

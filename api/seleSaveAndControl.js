@@ -140,6 +140,21 @@ exports.getOrderCancelPageHtml = function () {
                 });
         });
 }
+exports.getInventoryPageHtml = function () {
+    driver.manage().window().maximize();
+
+    return driver.get('https://sellercentral.'+amazonHost+'/inventory/ref=xx_invmgr_dnav_xx').then(()=>{
+        sleep.msleep(15*1000);
+        return driver.findElement(By.xpath('//*[@id="FULFILLMENT_SECTION"]/ul/li[3]/div/span/div/label/input[@value="FulfilledByAmazon"]')).click().then(()=>{
+            return driver.findElement(By.xpath('//*[@id="myitable"]/div[6]/div[3]/div/span/span/select')).click().then(()=>{
+                return driver.findElement(By.xpath('//*[@id="myitable-250-rpp"]')).click().then(()=>{
+                    sleep.msleep(15*1000);
+                    return driver.getPageSource();
+                })
+            })
+        })
+    });
+};
 exports.sendItems = function (url, trackIDs) {
     driver.get(url);
     return driver.wait(()=> {
@@ -244,14 +259,7 @@ exports.switchSite = function (amzSite) {
 exports.getUrlHtml = function (url) {
     return driver.get(url).then(()=>{
         sleep.msleep(15*1000);
-        if (url.match(/\/inventory\//g) !== null) {
-            return driver.findElement(By.xpath('//*[@id="FULFILLMENT_SECTION"]/ul/li[3]/div/span/div/label/input[@value="FulfilledByAmazon"]')).click().then(()=>{
-                sleep.msleep(15*1000);
-                return driver.getPageSource();
-            });
-        } else {
-            return driver.getPageSource();
-        }
+        return driver.getPageSource();
     });
 }
 exports.onlyGet = function (url) {
