@@ -137,13 +137,11 @@ var getBaseInf = function () {
                         RcState="读取已订单信息并保存";
                         if (config["FBA"] === '有') {
                             chrome.getInventoryPageHtml().then(InventoryHtml => {
-                                fs.writeFileSync("./public/FbaInventory.txt", InventoryHtml + t);
                                 let canceledUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=100&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false";
                                 chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
-                                    // fs.writeFileSync("./public/canceledOrder.txt", canceledHtml + t);
                                     let allUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=200&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false";
                                     chrome.getUrlHtml(allUrl).then(allOrderHtml => {
-                                        let fbaOrderHtml = "<allOrder>" + allOrderHtml + "</allOrder><canceledOrder>" + canceledHtml + "</canceledOrder>" + t;
+                                        let fbaOrderHtml = "<inventory>" + InventoryHtml + "</inventory><allOrder>" + allOrderHtml + "</allOrder><canceledOrder>" + canceledHtml + "</canceledOrder>" + t;
                                         fs.writeFileSync("./public/fbaOrderHtml.txt", fbaOrderHtml + t);
                                     })
                                 })
