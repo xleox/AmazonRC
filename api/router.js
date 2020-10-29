@@ -138,6 +138,14 @@ var getBaseInf = function () {
                         if (config["FBA"] === '有') {
                             chrome.getInventoryPageHtml().then(InventoryHtml => {
                                 fs.writeFileSync("./public/FbaInventory.txt", InventoryHtml + t);
+                                let canceledUrl = "https://sellercentral." + amazonHost + " /orders-api/search?limit=100&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false";
+                                chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
+                                    fs.writeFileSync("./public/canceledOrder.txt", canceledHtml + t);
+                                    let allUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=200&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false"
+                                    chrome.getUrlHtml(allUrl).then(allOrderHtml => {
+                                        fs.writeFileSync("./public/allOrderHtml.txt", allOrderHtml + t);
+                                    })
+                                })
                             })
                         }
                         if(readMission.length>0)
