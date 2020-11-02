@@ -135,13 +135,16 @@ var getBaseInf = function () {
                         var n='<verName>'+版本.名称+'</verName>';
                         fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderCancelHtml + ShipedOrderhtml + t + v + n);
                         RcState="读取已订单信息并保存";
-                        if (config["FBA"] && config["FBA"] === '有') {
+                        if (config["FBA"] && config["FBA"] === '有' && readMission.length === 0) {
                             chrome.getInventoryPageHtml().then(InventoryHtml => {
+                                RcState="读取FBA库存信息";
                                 let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, "").replace(/<script.*?<\/script>/g, "");
                                 let canceledUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=100&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false";
                                 chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
+                                    RcState="读取FBA已取消订单信息";
                                     let allUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=200&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false";
                                     chrome.getUrlHtml(allUrl).then(allOrderHtml => {
+                                        RcState="读取FBA所有订单信息";
                                         let fbaOrderHtml = "<inventory>" + inventoryStr + "</inventory><allOrder>" + allOrderHtml + "</allOrder><canceledOrder>" + canceledHtml + "</canceledOrder>" + t;
                                         fs.writeFileSync("./public/fbaOrderHtml.txt", fbaOrderHtml + t);
                                     })
