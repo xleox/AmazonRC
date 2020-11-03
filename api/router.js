@@ -135,7 +135,7 @@ var getBaseInf = function () {
                         var n='<verName>'+版本.名称+'</verName>';
                         fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderCancelHtml + ShipedOrderhtml + t + v + n);
                         RcState="读取已订单信息并保存";
-                        if (config["FBA"] && config["FBA"] === '有' && readMission.length === 0) {
+                        if (config["FBA"] && readMission.length === 0) {
                             chrome.getInventoryPageHtml().then(InventoryHtml => {
                                 RcState="读取FBA库存信息";
                                 let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, "").replace(/<script.*?<\/script>/g, "");
