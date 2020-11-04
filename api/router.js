@@ -146,7 +146,7 @@ var getBaseInf = function () {
                                     chrome.getUrlHtml(allUrl).then(allOrderHtml => {
                                         RcState="读取FBA所有订单信息";
                                         let fbaOrderHtml = "<inventory>" + inventoryStr + "</inventory><allOrder>" + allOrderHtml + "</allOrder><canceledOrder>" + canceledHtml + "</canceledOrder>" + t;
-                                        fs.writeFileSync("./public/fbaOrderHtml.txt", fbaOrderHtml + t);
+                                        fs.writeFileSync("./public/fbaOrderHtml.txt", fbaOrderHtml);
                                     })
                                 })
                             })
