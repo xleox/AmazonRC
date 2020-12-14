@@ -139,10 +139,10 @@ var getBaseInf = function () {
                             chrome.getInventoryPageHtml().then(InventoryHtml => {
                                 RcState="读取FBA库存信息";
                                 let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, "").replace(/<script.*?<\/script>/g, "");
-                                let canceledUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=100&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false";
+                                let canceledUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false";
                                 chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
                                     RcState="读取FBA已取消订单信息";
-                                    let allUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=200&offset=0&sort=order_date_desc&date-range=last-7&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false";
+                                    let allUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false";
                                     chrome.getUrlHtml(allUrl).then(allOrderHtml => {
                                         RcState="读取FBA所有订单信息";
                                         let fbaOrderHtml = "<inventory>" + inventoryStr + "</inventory><allOrder>" + allOrderHtml + "</allOrder><canceledOrder>" + canceledHtml + "</canceledOrder>" + t;
