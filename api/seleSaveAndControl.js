@@ -168,6 +168,7 @@ exports.sendItems = function (url, trackIDs) {
                             sleep.msleep(2*1000);
                             driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
                                 sleep.msleep(2*1000);
+                                console.log('//*[@id="dropdown1_' + liRet.length + '"])
                                 driver.findElement(By.xpath('//*[@id="dropdown1_' + liRet.length + '"]')).click();
                             })
                         }).then(carRet => {
@@ -177,7 +178,7 @@ exports.sendItems = function (url, trackIDs) {
                                     return driver.findElement(By.xpath('//a[contains(text(),"' + trackIDs[0].selectName + '")]')).click();
                                 else {
                                     sleep.msleep(2*1000);
-                                    driver.findElement(By.xpath('//a[contains(text(),"选择一个选项")]')).click();
+                                    driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
                                     sleep.msleep(2*1000);
                                     driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click();
                                     sleep.msleep(2*1000);
