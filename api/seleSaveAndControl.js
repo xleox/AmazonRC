@@ -172,9 +172,9 @@ exports.sendItems = function (url, trackIDs) {
                                 if(trackIDs[0].selectName != "其他")
                                     return driver.findElement(By.xpath('//*[@id="a-popover-2"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
                                 else {
-                                    // driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
-                                    // sleep.msleep(2*1000);
-                                    // driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
+                                    driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                                    sleep.msleep(2*1000);
+                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click();
                                     sleep.msleep(2*1000);
                                     return driver.findElement(By.xpath('//*[@id="a-popover-2"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
                                 }
