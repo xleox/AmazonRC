@@ -168,11 +168,11 @@ exports.sendItems = function (url, trackIDs) {
                             sleep.msleep(1*1000);
                             driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
                                 console.log(liRet, liRet.length)
-                                // if (liRet.length > 2) {
-                                //     driver.findElement(By.xpath('//*[@id="dropdown1_2"]')).click();
-                                // } else {
-                                //     driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
-                                // }
+                                if (liRet.length > 2) {
+                                    driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[3]')).click();
+                                } else {
+                                    driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[2]')).click();
+                                }
                             })
                         }).then(carRet => {
                             driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click().then(ret2 => {
