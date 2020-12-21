@@ -164,14 +164,19 @@ exports.sendItems = function (url, trackIDs) {
                 driver.getCurrentUrl().then(currentUrl=>{
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
+
+
+
                         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
+
+                            //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]
+
                             sleep.msleep(1*1000);
                             driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
-                                console.log(liRet, liRet.length)
-                                if (liRet.length > 2) {
-                                    driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[3]')).click();
+                                if (liRet.length === 3) {
+                                    driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[3]/a')).click();
                                 } else {
-                                    driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[2]')).click();
+                                    driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[2]/a')).click();
                                 }
                             })
                         }).then(carRet => {
