@@ -168,7 +168,7 @@ exports.sendItems = function (url, trackIDs) {
                             sleep.msleep(2*1000);
                             driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
                                 sleep.msleep(2*1000);
-                                console.log('//*[@id="dropdown1_' + liRet.length + '"])
+                                console.log('//*[@id="dropdown1_' + liRet.length + '"]')
                                 driver.findElement(By.xpath('//*[@id="dropdown1_' + liRet.length + '"]')).click();
                             })
                         }).then(carRet => {
