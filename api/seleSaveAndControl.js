@@ -167,6 +167,7 @@ exports.sendItems = function (url, trackIDs) {
                         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
                             sleep.msleep(2*1000);
                             driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
+                                console.log(liRet, liRet.length, '//*[@id="dropdown1_' + (liRet.length-1) + '"]')
                                 sleep.msleep(2*1000);
                                 driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click();
                             })
