@@ -166,17 +166,22 @@ exports.sendItems = function (url, trackIDs) {
                     if(currentUrl.indexOf("orders-v3") > 0){
                         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
                             sleep.msleep(1*1000);
+                            driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
+                                console.log(liRet)
+                            })
+
                             driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
                         }).then(carRet => {
                             driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click().then(ret2 => {
                                 if(trackIDs[0].selectName != "其他")
-                                    return driver.findElement(By.xpath('//*[@id="a-popover-2"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
+                                    // return driver.findElement(By.xpath('//*[@id="a-popover-2"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
+                                    return driver.findElement(By.xpath('//a[contains(text(),"' + trackIDs[0].selectName + '")]')).click();
                                 else {
-                                    driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                                    driver.findElement(By.xpath('//a[contains(text(),"选择一个选项")]')).click();
                                     sleep.msleep(2*1000);
                                     driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click();
                                     sleep.msleep(2*1000);
-                                    return driver.findElement(By.xpath('//*[@id="a-popover-2"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
+                                    return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
                                 }
                             }).then(ret3 => {
                                 sleep.msleep(2*1000);
