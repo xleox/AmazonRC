@@ -164,7 +164,37 @@ exports.sendItems = function (url, trackIDs) {
                 driver.getCurrentUrl().then(currentUrl=>{
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
-                        //新版发货
+                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(adsRet => {
+                            driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                        }).then(carRet => {
+                            driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span')).click().then(ret => {
+                                if(trackIDs[0].selectName != "其他")
+                                    return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
+                                else{
+                                    driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                                    sleep.msleep(1*1000);
+                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span/span')).click();
+                                    sleep.msleep(1*1000);
+                                    return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[contains(string(), "'+ trackIDs[0].selectName +'")]/a')).click();
+                                }
+                            })
+                        }).then(numRet => {
+                            sleep.msleep(2*1000);
+                            let sendMission = [];
+                            if(trackIDs[0].selectName == "其他") sendMission.push(inputTxtByXpath('//*[@id="customCarrierInput--1"]',trackIDs[0].companyName));
+                            for(var i=0;i<trackIDs.length;i++){
+                                sendMission.push(
+                                    inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input',
+                                        trackIDs[i].trackID));
+                            }
+                            Promise.all(sendMission).finally(()=>{
+                                driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                            })
+                        })
+
+
+
+                        /*
                         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span/span')).click()
                             .then(
                                 ret=>{
@@ -191,6 +221,10 @@ exports.sendItems = function (url, trackIDs) {
                                     driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
                                 })
                                     });
+
+*/
+
+
                     }else {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
