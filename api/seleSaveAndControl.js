@@ -184,9 +184,7 @@ exports.sendItems = function (url, trackIDs) {
                             let sendMission = [];
                             if(trackIDs[0].selectName == "其他") sendMission.push(inputTxtByXpath('//*[@id="customCarrierInput--1"]',trackIDs[0].companyName));
                             for(var i=0;i<trackIDs.length;i++){
-                                sendMission.push(
-                                    inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input',
-                                        trackIDs[i].trackID));
+                                sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
                             }
                             Promise.all(sendMission).finally(()=>{
                                 driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
@@ -321,7 +319,7 @@ let inputTxtByXpath = function (xpath,v) {
                         else if(xpath == '//*[@id="carrierName_UNSHIPPEDITEMS"]')
                             return driver.findElement(By.xpath(xpath)).clear()
                                 .then(doc=>{
-                                    sleep.msleep(1*1000);
+                                    sleep.msleep(2*1000);
                                     return driver.findElement(By.xpath(xpath)).sendKeys(v);
                                 });
                         else
