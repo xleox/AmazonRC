@@ -188,6 +188,7 @@ exports.sendItems = function (url, trackIDs) {
                                     let sendMission = [];
                                     if(trackIDs[0].selectName == "其他")
                                         sendMission.push(inputTxtByXpath('//*[@id="customCarrierInput--1"]', trackIDs[0].companyName));
+                                    sendMission.push(inputTxtByXpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/input', ''));
                                     for (let i=0; i < trackIDs.length; i++) {
                                         sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
                                     }
