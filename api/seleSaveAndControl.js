@@ -185,7 +185,7 @@ exports.sendItems = function (url, trackIDs) {
                                             return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
                                         }
                                 }).then(ret3 => {
-                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/input')).clear().then(ret4 => {
+                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/input')).sendKeys("").then(ret4 => {
                                         sleep.msleep(2*1000);
                                         let sendMission = [];
                                         if(trackIDs[0].selectName == "其他")
