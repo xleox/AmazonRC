@@ -169,8 +169,20 @@ exports.sendItems = function (url, trackIDs) {
                             driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
                                 // console.log(liRet, liRet.length, '//*[@id="dropdown1_' + (liRet.length-1) + '"]')
                                 sleep.msleep(2*1000);
-                                //driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click();
-                                driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li['+liRet.length+']/a')).click();
+                                driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click();
+                                // driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li['+liRet.length+']/a')).click();
+                            }).then(carRet => {
+                                driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click().then(ret2 => {
+                                    if(trackIDs[0].selectName != "其他")
+                                        return driver.findElement(By.xpath('//a[contains(text(),"' + trackIDs[0].selectName + '")]')).click();
+                                    else {
+                                        driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
+                                        sleep.msleep(2*1000);
+                                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click();
+                                        sleep.msleep(2*1000);
+                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
+                                    }
+                                })
                             })
                         })
                         //     .then(carRet => {
