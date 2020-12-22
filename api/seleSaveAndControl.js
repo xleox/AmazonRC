@@ -170,7 +170,7 @@ exports.sendItems = function (url, trackIDs) {
                                 // console.log(liRet, liRet.length, '//*[@id="dropdown1_' + (liRet.length-1) + '"]')
                                 sleep.msleep(2*1000);
                                 //driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click();
-                                driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li['+liRet.length+']')).click();
+                                driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li['+liRet.length+']/a')).click();
                             })
                         }).then(carRet => {
                             driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click().then(ret2 => {
