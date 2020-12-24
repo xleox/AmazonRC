@@ -176,10 +176,16 @@ exports.sendItems = function (url, trackIDs) {
                                     driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
                                     sleep.msleep(1000);
                                 }
-                                return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click().then(ret2 => {
+                                return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click().then(ret4 => {
                                     sleep.msleep(2*1000);
-                                    return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName);
-                                    // let sendMission = [];
+                                    return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName).then(ret5 => {
+                                        let sendMission = [];
+                                        for (let i=0; i < trackIDs.length; i++) {
+                                            sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
+                                        }
+                                        sleep.msleep(5*1000);
+                                        return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                                    })
                                 })
                             })
                         })
@@ -197,19 +203,20 @@ exports.sendItems = function (url, trackIDs) {
                     }
                     return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click().then(ret2 => {
                         sleep.msleep(2*1000);
-                        return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName);
-
-
-                        // let sendMission = [];
+                        return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName).then(ret3 => {
+                            let sendMission = [];
+                            for (let i=0; i < trackIDs.length; i++) {
+                                sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
+                            }
+                            return Promise.all(sendMission).finally(() => {
+                                sleep.msleep(5*1000);
+                                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                            })
+                        })
                     })
                 })
             }
         })
-
-
-
-
-
                 /*driver.getCurrentUrl().then(currentUrl=>{
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
@@ -309,11 +316,8 @@ exports.sendItems = function (url, trackIDs) {
 
                 });*/
 
-
-
-
-        })
-}
+    })
+};
 exports.uploadListing = function (url, filePath) {
     driver.get(url);
     return driver.wait(()=> {
