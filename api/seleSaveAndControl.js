@@ -153,52 +153,68 @@ exports.getInventoryPageHtml = function () {
 exports.sendItems = function (url, trackIDs) {
     driver.get(url);
     return driver.wait(()=> {
-        return driver.getTitle()
-            .then( title => {  //等待进入界面
-                //console.log(title.indexOf("亚马逊"));
-                if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
-                else return false;
-            } );}, 60000).then(title => {
-                console.log("准备发货");
-                sleep.msleep(8*1000);
-                driver.getCurrentUrl().then(currentUrl=>{
+        return driver.getTitle().then(title => {  //等待进入界面
+            //console.log(title.indexOf("亚马逊"));
+            if (title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
+            else return false;
+        })
+    }, 60000).then(title => {
+        console.log("准备发货");
+        sleep.msleep(8*1000);
+        driver.getPageSource().then(pageHtml => {
+            if (pageHtml.match(/name="BulkConfirmShipment-ShipFromDropdown"/g) !== null) {
+                console.log("新页面")
+            } else {
+                console.log("旧页面")
+            }
+        })
+
+
+
+
+
+                /*driver.getCurrentUrl().then(currentUrl=>{
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
-                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click()
-                            .then(ret1 => {
-                            sleep.msleep(1000);
-                            driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
-                                sleep.msleep(1000);
-                                return driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click();
-                                // driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li['+liRet.length+']/a')).click();
-                            }).then(carRet => {
-                                driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click()
-                                    .then(ret2 => {
-                                    if(trackIDs[0].selectName != "其他")
-                                        return driver.findElement(By.xpath('//a[contains(text(),"' + trackIDs[0].selectName + '")]')).click();
-                                    else {
-                                        driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
-                                        sleep.msleep(1000);
-                                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click();
-                                        sleep.msleep(1000);
-                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
-                                    }
-                                }).then(ret3 => {
-                                    sleep.msleep(2*1000);
-                                    let sendMission = [];
-                                    if(trackIDs[0].selectName == "其他")
-                                        sendMission.push(inputTxtByXpath('//*[@id="customCarrierInput--1"]', trackIDs[0].companyName));
-                                    for (let i=0; i < trackIDs.length; i++) {
-                                        sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
-                                    }
-                                    Promise.all(sendMission).finally(() => {
-                                        sleep.msleep(5*1000);
-                                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
-                                    })
-                                })
-                            })
-                        })
-                        /*
+
+                        // driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click()
+                        //     .then(ret1 => {
+                        //     sleep.msleep(1000);
+                        //     driver.findElements( By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
+                        //         sleep.msleep(1000);
+                        //         return driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click();
+                        //         // driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li['+liRet.length+']/a')).click();
+                        //     }).then(carRet => {
+                        //         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click()
+                        //             .then(ret2 => {
+                        //             if(trackIDs[0].selectName != "其他")
+                        //                 return driver.findElement(By.xpath('//a[contains(text(),"' + trackIDs[0].selectName + '")]')).click();
+                        //             else {
+                        //                 driver.findElement(By.xpath('//*[@id="dropdown1_0"]')).click();
+                        //                 sleep.msleep(1000);
+                        //                 driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span/span')).click();
+                        //                 sleep.msleep(1000);
+                        //                 return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
+                        //             }
+                        //         }).then(ret3 => {
+                        //             sleep.msleep(2*1000);
+                        //             let sendMission = [];
+                        //             if(trackIDs[0].selectName == "其他")
+                        //                 sendMission.push(inputTxtByXpath('//*[@id="customCarrierInput--1"]', trackIDs[0].companyName));
+                        //             for (let i=0; i < trackIDs.length; i++) {
+                        //                 sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
+                        //             }
+                        //             Promise.all(sendMission).finally(() => {
+                        //                 sleep.msleep(5*1000);
+                        //                 driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                        //             })
+                        //         })
+                        //     })
+                        // })
+
+
+
+
                         driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span/span')).click()
                             .then(
                                 ret=>{
@@ -226,7 +242,7 @@ exports.sendItems = function (url, trackIDs) {
                                 })
                                     });
 
-*/
+
 
 
                     }else {
@@ -252,7 +268,10 @@ exports.sendItems = function (url, trackIDs) {
                                 })
                         });
                     }
-                });
+
+
+                });*/
+
 
 
 
