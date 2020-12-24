@@ -161,16 +161,16 @@ exports.sendItems = function (url, trackIDs) {
     }, 60000).then(title => {
         console.log("准备发货");
         sleep.msleep(8*1000);
-        driver.getPageSource().then(pageHtml => {
+        return driver.getPageSource().then(pageHtml => {
             if (pageHtml.match(/name="BulkConfirmShipment-ShipFromDropdown"/g) !== null) {
-                driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
+                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
                     console.log("============")
                     console.log("新页面", ret1)
                 })
 
             } else {
-                driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click().then(ret1 => {
+                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
                     console.log("============")
                     console.log("旧页面", ret1)
