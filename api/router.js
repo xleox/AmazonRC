@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.8.9',
+    代号:'2.0.9.0',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -179,7 +179,7 @@ var getBaseInf = function () {
     });
 }
 
-//getBaseInf();  //启动先打开。。。。。。。。。。
+getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()},600*1000);
 setInterval(()=>{sendItems()},30*1000);
 setInterval(()=>{uploadListing()},35*1000);
