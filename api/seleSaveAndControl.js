@@ -165,15 +165,22 @@ exports.sendItems = function (url, trackIDs) {
             if (pageHtml.match(/name="BulkConfirmShipment-ShipFromDropdown"/g) !== null) {
                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
-                    console.log("============")
-                    console.log("新页面", ret1)
+                    return driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
+                        console.log("============")
+                        console.log("发货地址数量：", liRet, liRet.length)
+                    })
                 })
 
             } else {
                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
-                    console.log("============")
-                    console.log("旧页面", ret1)
+                    if (trackIDs[0].selectName == "其他") {
+                        driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                        sleep.msleep(1000);
+                        driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click();
+                        sleep.msleep(1000);
+                    }
+                    return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
                 })
             }
         })
