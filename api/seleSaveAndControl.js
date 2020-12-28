@@ -214,7 +214,6 @@ exports.sendItems = function (url, trackIDs) {
                 })
 
             } else {
-                //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]
                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
                     if (trackIDs[0].selectName == "其他") {
