@@ -168,10 +168,14 @@ exports.sendItems = function (url, trackIDs) {
                     return driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
                         sleep.msleep(1000);
                         return driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click().then(ret2 => {
+                        // return driver.findElement(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li[' + (liRet.length-1) + ']/a')).click().then(ret2 => {
                             sleep.msleep(1000);
                             return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click().then(ret3 => {
+                                //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]
+
                                 if (trackIDs[0].selectName == "其他") {
-                                    driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                                    driver.findElement(By.xpath('//*[@id="dropdown2_1"]')).click();
+                                    //*[@id="a-popover-2"]/div/div/ul/li[2]
                                     sleep.msleep(1000);
                                     driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
                                     sleep.msleep(1000);
@@ -248,6 +252,17 @@ exports.sendItems = function (url, trackIDs) {
                 })
             }
         })
+
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span/span
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span
+        //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]
+
+
                 /*driver.getCurrentUrl().then(currentUrl=>{
                     console.log(currentUrl);
                     if(currentUrl.indexOf("orders-v3") > 0){
@@ -316,10 +331,6 @@ exports.sendItems = function (url, trackIDs) {
                                     driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
                                 })
                                     });
-
-
-
-
                     }else {
                         //旧版发货
                         driver.findElement(By.xpath('//*[@id="carrierNameDropDown_UNSHIPPEDITEMS"]')).click()
