@@ -181,7 +181,7 @@ var getBaseInf = function () {
 
 getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()},600*1000);
-setInterval(()=>{sendItems()},30*1000);
+setInterval(()=>{sendItems()},60*1000);
 setInterval(()=>{uploadListing()},35*1000);
 var sendItems=function () {
     if(RcBusy)return;
