@@ -165,6 +165,10 @@ exports.sendItems = function (url, trackIDs) {
             sleep.msleep(5*1000);
             if (pageHtml.match(/name="BulkConfirmShipment-ShipFromDropdown"/g) !== null) {
                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
+                    console.log("有发货地址：", driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li')))
+                })
+                /*
+                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
                     return driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
                         sleep.msleep(1000);
@@ -212,7 +216,7 @@ exports.sendItems = function (url, trackIDs) {
                         })
                     })
                 })
-
+*/
             } else {
                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
