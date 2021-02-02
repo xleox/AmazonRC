@@ -6,4 +6,6 @@ AmazonRC.rar
 /chromedriver.exe
 /undefined/
 /dist/
+/public/
+/compile.js
 /public/homeAndOrderPage.txt
