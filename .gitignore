@@ -1,9 +1,9 @@
 .idea
 /package-lock.json
-
 AmazonRC.rar
 /api/setting.js
 /api/chromedriver.exe
 /chromedriver.exe
 /undefined/
+/dist/
 /public/homeAndOrderPage.txt
