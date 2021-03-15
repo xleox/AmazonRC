@@ -88,7 +88,7 @@ exports.getOrderPageHtml = function () {
             //查看订单数量
             return driver.wait(until.elementLocated(By.xpath('//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]')), 10*1000)
                 .then(()=>{
-                    sleep.msleep(10*1000);
+                    sleep.msleep(20*1000);
                     return driver.getPageSource();
                 });
         });
@@ -113,7 +113,7 @@ exports.getOrderShippedPageHtml = function () {
             //查看订单数量
             return driver.wait(until.elementLocated(By.xpath('//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]')), 10*1000)
                 .then(()=>{
-                    sleep.msleep(10*1000);
+                    sleep.msleep(20*1000);
                     return driver.getPageSource();
                 });
         });
@@ -137,7 +137,7 @@ exports.getOrderCancelPageHtml = function () {
             //查看订单数量
             return driver.wait(until.elementLocated(By.xpath('//*[@id="myo-layout"]/div[2]/div[1]/div[1]/div/span[1]')), 10*1000)
                 .then(()=>{
-                    sleep.msleep(10*1000);
+                    sleep.msleep(20*1000);
                     return driver.getPageSource();
                 });
         });
