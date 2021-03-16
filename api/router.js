@@ -105,7 +105,7 @@ var getBaseInf = function () {
                 RcState="读取首页信息";
                 if(merchantId =='' || merchantId == '-')
                     merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
-                marketplaceId=getTextByReg(homeHtml,/(?<=marketplaceID": ")(.*?)(?=")/g,0);
+                marketplaceId=getTextByReg(homeHtml,/(?<="marketplaceId":")(.*?)(?=")/g,0);
                 if(amazonHost == 'amazon.com' && marketplaceId !='ATVPDKIKX0DER')
                 {
                     console.log('美国店铺首页不是美国站，正在跳转');
