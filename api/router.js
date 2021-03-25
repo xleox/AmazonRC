@@ -19,7 +19,7 @@ let amazonHost="amazon.com";
 if(config.站点 != undefined)
     amazonHost=config.站点;
 
-let deliverMission={
+let deliverMission = {
     url:"",
     items:[]
 };
@@ -180,28 +180,28 @@ var getBaseInf = function () {
 }
 
 getBaseInf();  //启动先打开。。。。。。。。。。
-setInterval(()=>{getBaseInf()},600*1000);
-setInterval(()=>{sendItems()},60*1000);
-setInterval(()=>{uploadListing()},35*1000);
-var sendItems=function () {
-    if(RcBusy)return;
-    if(deliverMission.items.length == 0)return;
-    RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},120*1000);
+setInterval(()=>{getBaseInf()}, 600 * 1000);
+setInterval(()=>{sendItems()}, 3 * 60 * 1000);
+setInterval(()=>{uploadListing()}, 35*1000);
+var sendItems = function () {
+    if (RcBusy) return;
+    if (deliverMission.items.length === 0) return;
+    RcBusy = true;
+    setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 120 * 1000);
 
     var orderIDs = "";
-    var nowItems=deliverMission.items;
-    var plan2SendItems=[];
-    var delItems=function (orderID) {
-        for(var i=0;i<nowItems.length;i++)
-            if(nowItems[i].orderID == orderID){
-                nowItems.splice(i,1);
+    var nowItems = deliverMission.items;
+    var plan2SendItems = [];
+    var delItems = function (orderID) {
+        for (let i = 0; i < nowItems.length; i++)
+            if (nowItems[i].orderID === orderID) {
+                nowItems.splice(i, 1);
             }
-    }
-    var initSelectName=deliverMission.items[0].selectName , initCompanyName=deliverMission.items[0].companyName;
+    };
+    var initSelectName = deliverMission.items[0].selectName , initCompanyName = deliverMission.items[0].companyName;
     //把要发货的从系统发货数组里转移到计划里
-    for(var i=0;i<nowItems.length;i++)
-        if(nowItems[i].selectName == initSelectName && nowItems[i].companyName == initCompanyName){
+    for(let i = 0; i < nowItems.length; i++)
+        if(nowItems[i].selectName === initSelectName && nowItems[i].companyName === initCompanyName){
             orderIDs = orderIDs +  nowItems[i].orderID + ";";
             plan2SendItems.push(nowItems[i]);
         }
@@ -427,13 +427,21 @@ router.post('/sendItem',(req,res) => {
         var items = JSON.parse(req.body.items);
 
         for(var i=0;i<items.length;i++)
-            if(isInDeliverMission(items[i].orderID)==-1){
-                deliverMission.items.push({orderID:items[i].orderID,trackID:items[i].trackID,
-                    selectName:items[i].selectName,companyName:items[i].companyName});
+            if (isInDeliverMission(items[i].orderID) == -1) {
+                deliverMission.items.push({
+                    orderID: items[i].orderID,
+                    trackID: items[i].trackID,
+                    selectName: items[i].selectName,
+                    companyName: items[i].companyName,
+                    serviceSelect: items[i].serviceSelect,
+                    serviceContent: items[i].serviceContent,
+                });
             }else{
                 deliverMission.items[i].trackID = items[i].trackID;
                 deliverMission.items[i].selectName = items[i].selectName;
                 deliverMission.items[i].companyName = items[i].companyName;
+                deliverMission.items[i].serviceSelect = items[i].serviceSelect;
+                deliverMission.items[i].serviceContent = items[i].serviceContent;
             }
         //console.log(deliverMission);
         res.send("ok");
