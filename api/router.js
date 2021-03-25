@@ -416,8 +416,9 @@ router.post('/sendItem',(req,res) => {
     }else
         res.send("check please");
 });*/
+let testList = {};
 router.post('/sendItem',(req,res) => {
-
+    testList = JSON.parse(req.body.items);
     let isInDeliverMission = function (orderID) {
         for(let i=0;i<deliverMission.items.length;i++)
             if(deliverMission.items[i].orderID == orderID) return i;
@@ -450,7 +451,7 @@ router.post('/sendItem',(req,res) => {
         res.send("check please");
 });
 router.get('/state',(req,res) => {
-    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission,"readMission":readMission ,'uploadMission':uploadMission});
+    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission,"readMission":readMission ,'uploadMission':uploadMission, "testList": testList});
 });
 function download (url, dest, cb) {
     var file = fs.createWriteStream(dest);
