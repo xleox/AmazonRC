@@ -417,16 +417,17 @@ router.post('/sendItem',(req,res) => {
         res.send("check please");
 });*/
 router.post('/sendItem',(req,res) => {
+
     let isInDeliverMission = function (orderID) {
-        for(var i=0;i<deliverMission.items.length;i++)
+        for(let i=0;i<deliverMission.items.length;i++)
             if(deliverMission.items[i].orderID == orderID) return i;
         return -1;
     }
     if(req.body.url != undefined && req.body.items != undefined){
-        deliverMission.url=req.body.url;
+        deliverMission.url = req.body.url;
         var items = JSON.parse(req.body.items);
 
-        for(var i=0;i<items.length;i++)
+        for(let i=0;i<items.length;i++)
             if (isInDeliverMission(items[i].orderID) == -1) {
                 deliverMission.items.push({
                     orderID: items[i].orderID,
