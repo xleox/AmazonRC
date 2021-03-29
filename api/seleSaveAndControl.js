@@ -73,7 +73,7 @@ exports.getOrderPageHtml = function () {
     driver.manage().window().maximize();
     //driver.get('https://sellercentral.amazon.com/orders-v3?ref_=ag_myo_dnav_xx_&_encoding=UTF8');
     //driver.get('https://sellercentral.amazon.com/orders-v3/mfn/shipped?ref_=xx_myo_dnav_home&_encoding=UTF8&date-range=last-365&page=1');
-    driver.get('https://sellercentral.'+amazonHost+'/orders-v3/ref=xx_myo_dnav_xx?date-range=last-30&sort=order_date_desc&page=1');
+    driver.get('https://sellercentral.'+amazonHost+'/orders-v3/mfn/unshipped?date-range=last-30&sort=order_date_desc&page=1');
     return driver.getTitle()
         .then( title => {  //等待进入界面
             if(title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
