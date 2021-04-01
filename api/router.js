@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.9.4',
+    代号:'2.0.9.5',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -316,7 +316,7 @@ var uploadListing=function () {
                     chrome.getHomePageHtml().then(homeHtml=>{
                         if(merchantId =='' || merchantId == '-')
                             merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
-                        marketplaceId=getTextByReg(homeHtml,/(?<=marketplaceID": ")(.*?)(?=")/g,0);
+                        marketplaceId=getTextByReg(homeHtml,/(?<="marketplaceId":")(.*?)(?=")/g,0);
                         if (uploadMission.amzUrl.indexOf('/disburse/submit') !== -1) {
                             if (marketplaceId !== "-") {
                                 if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
