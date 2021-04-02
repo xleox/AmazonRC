@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.9.5',
+    代号:'2.0.9.6',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -320,7 +320,8 @@ var uploadListing=function () {
                         if (uploadMission.amzUrl.indexOf('/disburse/submit') !== -1) {
                             if (marketplaceId !== "-") {
                                 if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
-                                    return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
+                                    if (merchantId !== '-')
+                                        return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
                                 else
                                     return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
                             } else {
@@ -331,7 +332,8 @@ var uploadListing=function () {
                             }
                         } else {
                             if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
-                                return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
+                                if (merchantId !== '-')
+                                    return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
                             else
                                 return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
                         }
