@@ -337,7 +337,7 @@ var uploadListing=function () {
                         }
                     }).then(
                         (ret)=>{
-                            if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceID": ")(.*?)(?=")/g,0))
+                            if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceId": ")(.*?)(?=")/g,0))
                             { //再次验证 看是否已经跳转
                                 if(uploadMission.amzUrl.indexOf('/disburse/submit') == -1){ //判断是否申请转账 还是上传产品
                                     RcState = "准备上传(上传产品)";
