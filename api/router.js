@@ -7,14 +7,14 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.9.6',
+    代号:'2.0.9.7',
     名称:'牛刀'
 }
 const sleep = require('sleep');
-let RcState="";
-let RcBusy=false;
-let merchantId='';  //用户在亚马逊的唯一标识之一 可以用来切换店铺
-let marketplaceId='';  //店铺ID
+let RcState = "";
+let RcBusy = false;
+let merchantId = "";  //用户在亚马逊的唯一标识之一 可以用来切换店铺
+let marketplaceId = "";  //店铺ID
 let amazonHost="amazon.com";
 if(config.站点 != undefined)
     amazonHost=config.站点;
@@ -103,22 +103,21 @@ var getBaseInf = function () {
             sleep.msleep(6*1000);
             chrome.getHomePageHtml().then(homeHtml=>{
                 RcState="读取首页信息";
-                if(merchantId =='' || merchantId == '-')
-                    merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
-                marketplaceId=getTextByReg(homeHtml,/(?<="marketplaceId":")(.*?)(?=")/g,0);
-                if(amazonHost == 'amazon.com' && marketplaceId !='ATVPDKIKX0DER')
-                {
+                if(merchantId === "" || merchantId === "-") {
+                    merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
+                }
+                marketplaceId = getTextByReg(homeHtml, /(?<="marketplaceId":")(.*?)(?=")/g, 0);
+                if (amazonHost === 'amazon.com' && marketplaceId !== "ATVPDKIKX0DER") {
                     console.log('美国店铺首页不是美国站，正在跳转');
                     RcState='美国店铺首页不是美国站，正在跳转';
                     return chrome.getUrlHtml('https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=ATVPDKIKX0DER&merchantId=' + merchantId);
                 }
-                if(amazonHost == 'amazon.co.uk' && marketplaceId !='A1F83G8C2ARO7P')
-                {
+                if (amazonHost === 'amazon.co.uk' && marketplaceId !== "A1F83G8C2ARO7P") {
                     console.log('欧洲店铺首页不是英国站，正在跳转');
                     RcState='欧洲店铺首页不是英国站，正在跳转';
                     return chrome.getUrlHtml('https://sellercentral.amazon.co.uk/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=' + merchantId);
                 }
-                //console.log(marketplaceId,merchantId);
+                // console.log(marketplaceId, merchantId);
                 return new Promise(function(resolve, reject){resolve(homeHtml);});
             }).then(homeHtml=>{
                 chrome.getOrderPageHtml().then(Orderhtml=>{
@@ -179,7 +178,7 @@ var getBaseInf = function () {
     });
 }
 
-getBaseInf();  //启动先打开。。。。。。。。。。
+// getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()}, 600 * 1000);
 setInterval(()=>{sendItems()}, 3 * 60 * 1000);
 setInterval(()=>{uploadListing()}, 35*1000);
@@ -300,84 +299,81 @@ var uploadListing=function () {
     var listingPath=__dirname.replace('api','public\\'+listingName);
     RcState="开始下载listing(上传产品)";
     download(uploadMission.listingUrl,"./public/"+listingName,(function (ret) {
-        if(ret)
-        {
-            console.log('下载listing完成',listingPath);
-            RcState="正在打开页面(上传产品/申请转账)";
-            chrome.amazonLogin(config.账户,config.密码)
-                .then(title => {
-                    if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
-                        RcState = "两步验证，需要协助登陆";
-                        console.log("两步验证，需要协助登陆", title);
-                        return title;
+        if(ret) {
+            console.log('下载listing完成', listingPath);
+            RcState = "正在打开页面(上传产品/申请转账)";
+            chrome.amazonLogin(config.账户,config.密码).then(title => {
+                if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
+                    RcState = "两步验证，需要协助登陆";
+                    console.log("两步验证，需要协助登陆", title);
+                    return title;
+                }
+                RcState = "登陆成功(上传产品/申请转账)";
+                console.log("登陆成功(上传产品/申请转账)", title);
+                chrome.getHomePageHtml().then(homeHtml => {
+                    if(merchantId === "" || merchantId === "-") {
+                        merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
                     }
-                    RcState = "登陆成功(上传产品/申请转账)";
-                    console.log("登陆成功(上传产品/申请转账)", title);
-                    chrome.getHomePageHtml().then(homeHtml=>{
-                        if(merchantId =='' || merchantId == '-')
-                            merchantId=getTextByReg(homeHtml,/(?<=merchantId": ")(.*?)(?=")/g,0);
-                        marketplaceId=getTextByReg(homeHtml,/(?<="marketplaceId":")(.*?)(?=")/g,0);
-                        if (uploadMission.amzUrl.indexOf('/disburse/submit') !== -1) {
-                            if (marketplaceId !== "-") {
-                                if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
-                                    if (merchantId !== '-')
-                                        return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
-                                else
-                                    return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
+                    marketplaceId = getTextByReg(homeHtml, /(?<=data-marketplace_selection=")(.*?)(?=")/g, 0);
+                    // console.log(merchantId, marketplaceId);
+                    if (marketplaceId !== "-") {
+                        if(marketID[uploadMission.amzSite] !== marketplaceId) {
+                            if (merchantId !== '-') {
+                                return chrome.getUrlHtml('https://sellercentral.' + amazonHost + '/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] + '&merchantId=' + merchantId);
                             } else {
-                                console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
+                                console.log("merchantId: " + merchantId + " 匹配出错！！！");
                                 chrome.quit();
-                                uploadMission.listingUrl='';
-                                return marketplaceId;
+                                uploadMission.listingUrl = '';
+                                return merchantId;
                             }
                         } else {
-                            if(marketID[uploadMission.amzSite] != marketplaceId) //如果店铺ID地址不对
-                                if (merchantId !== '-')
-                                    return chrome.getUrlHtml('https://sellercentral.'+amazonHost+'/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] +'&merchantId=' + merchantId);
-                            else
-                                return new Promise(function(resolve, reject){resolve('"marketplaceID": "'+marketplaceId+'"');});
+                            return new Promise(function(resolve, reject){resolve('"marketplaceId": "' + marketplaceId + '"');});
                         }
-                    }).then(
-                        (ret)=>{
-                            if(marketID[uploadMission.amzSite] == getTextByReg(ret,/(?<=marketplaceId": ")(.*?)(?=")/g,0))
-                            { //再次验证 看是否已经跳转
-                                if(uploadMission.amzUrl.indexOf('/disburse/submit') == -1){ //判断是否申请转账 还是上传产品
-                                    RcState = "准备上传(上传产品)";
-                                    console.log("准备上传(上传产品)", title);
-                                    chrome.uploadListing(uploadMission.amzUrl,listingPath,uploadMission.amzSite);
-                                    uploadMission.listingUrl='';
-                                }else {
-                                    RcState = "申请转账";
-                                    console.log("申请转账", title);
-                                    chrome.getUrlHtml(uploadMission.amzUrl).then(html => {
-                                        let datetime = moment().format('YYYY-MM-DD HH:mm:ss');
-                                        let withdrawHtml = html.replace(/\t|\n|\r|\s/g, "");
-                                        withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currency.*?">)(.*?)(?=<\/span>)/g);
-                                        let transferAmount = "";
-                                        if (withdrawHtml !== null) {
-                                            transferAmount = withdrawHtml[0];
-                                        } else {
-                                            transferAmount = "-";
-                                        }
-                                        let options = {flag: "a+"};
-                                        let saveInfo = '{"转账时间": "' + datetime + '", "转账站点": "' + uploadMission.amzSite + '", "转账金额": "' + transferAmount + '"}\n';
-                                        fs.writeFileSync("./public/withdraw.txt", saveInfo, options);
-                                        uploadMission.listingUrl='';
-                                        return new Promise(function(resolve, reject){resolve('done');});
-                                    });
-                                }
-
-                            }
+                    } else {
+                        console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
+                        chrome.quit();
+                        uploadMission.listingUrl='';
+                        return marketplaceId;
+                    }
+                }).then((ret) => {
+                    if (marketID[uploadMission.amzSite] === getTextByReg(ret, /(?<=data-marketplace_selection=")(.*?)(?=")/g, 0)) { //再次验证 看是否已经跳转
+                        if (uploadMission.amzUrl.indexOf('/disburse/submit') === -1) { //判断是否申请转账 还是上传产品
+                            RcState = "准备上传(上传产品)";
+                            console.log("准备上传(上传产品)", title);
+                            chrome.uploadListing(uploadMission.amzUrl, listingPath, uploadMission.amzSite);
+                            uploadMission.listingUrl = '';
+                        } else {
+                            RcState = "申请转账";
+                            console.log("申请转账", title);
+                            chrome.getUrlHtml(uploadMission.amzUrl).then(html => {
+                                let datetime = moment().format("YYYY-MM-DD HH:mm:ss");
+                                let withdrawHtml = html.replace(/\t|\n|\r|\s/g, "");
+                                withdrawHtml = withdrawHtml.match(/(?<=id="currentBalanceValue"><spanclass="currency.*?">)(.*?)(?=<\/span>)/g);
+                                let transferAmount = "";
+                                if (withdrawHtml !== null) transferAmount = withdrawHtml[0];
+                                else transferAmount = "-";
+                                let options = {flag: "a+"};
+                                let saveInfo = '{"转账时间": "' + datetime + '", "转账站点": "' + uploadMission.amzSite + '", "转账金额": "' + transferAmount + '"}\n';
+                                fs.writeFileSync("./public/withdraw.txt", saveInfo, options);
+                                uploadMission.listingUrl = "";
+                                return new Promise(function(resolve, reject){resolve('done');});
+                            });
                         }
-                    )
-                }).catch(err => {
+                    } else {
+                        console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
+                        chrome.quit();
+                        uploadMission.listingUrl = "";
+                        return marketplaceId;
+                    }
+                })
+            }).catch(err => {
                 chrome.quit();
                 console.log("上传产品/申请转账 出错" , err);
                 uploadMission.listingUrl='';
             });
         }
     }))
-}
+};
 router.get('/quit',(req,res) => {
     chrome.quit();
     res.send("quit");
@@ -472,10 +468,10 @@ function download (url, dest, cb) {
  * @param i 第几个
  * @returns {string}
  */
-let getTextByReg=function (text,reg,i) {
-    let regMatch=text.match(reg);
-    if(regMatch != null)
-        if(regMatch[i] != undefined)
+let getTextByReg = function (text, reg, i) {
+    let regMatch = text.match(reg);
+    if(regMatch !== null)
+        if(regMatch[i] !== undefined)
             return regMatch[i];
     return "-"
 };
