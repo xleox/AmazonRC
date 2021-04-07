@@ -178,7 +178,7 @@ var getBaseInf = function () {
     });
 }
 
-// getBaseInf();  //启动先打开。。。。。。。。。。
+getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()}, 600 * 1000);
 setInterval(()=>{sendItems()}, 3 * 60 * 1000);
 setInterval(()=>{uploadListing()}, 35*1000);
