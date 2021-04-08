@@ -187,11 +187,11 @@ exports.sendItems = function (url, trackIDs) {
                                             return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName).then(ret6 => {
                                                 sleep.msleep(2 * 1000);
                                                 if (trackIDs[0].serviceSelect !== "其他") {
-                                                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret5 => {
-                                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret5 => {
+                                                        driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
                                                     })
                                                 } else {
-                                                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                                                    driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
                                                 }
                                                 let sendMission = [];
                                                 for (let i=0; i < trackIDs.length; i++) {
@@ -206,11 +206,11 @@ exports.sendItems = function (url, trackIDs) {
                                     } else {
                                         sleep.msleep(2 * 1000);
                                         if (trackIDs[0].serviceSelect !== "其他") {
-                                            return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret5 => {
-                                                return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                                            driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret5 => {
+                                                driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
                                             })
                                         } else {
-                                            return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                                            driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
                                         }
                                         let sendMission = [];
                                         for (let i=0; i < trackIDs.length; i++) {
