@@ -67,7 +67,6 @@ exports.amazonLogin = function (username,password) {
             });
     }
 exports.getHomePageHtml = function () {
-    sleep.msleep(10*1000);
     return driver.getPageSource();
 }
 exports.getOrderPageHtml = function () {

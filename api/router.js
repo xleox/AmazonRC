@@ -7,7 +7,7 @@ const fs = require('fs');
 const Promise = require("bluebird");
 const config = require('./setting').config;
 const 版本={
-    代号:'2.0.9.7',
+    代号:'2.0.9.0',
     名称:'牛刀'
 }
 const sleep = require('sleep');
@@ -315,28 +315,28 @@ var uploadListing=function () {
                         merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
                     }
                     marketplaceId = getTextByReg(homeHtml, /(?<=data-marketplace_selection=")(.*?)(?=")/g, 0);
-                    // console.log(merchantId, marketplaceId);
+                    //console.log(merchantId, marketplaceId);
                     if (marketplaceId !== "-") {
                         if(marketID[uploadMission.amzSite] !== marketplaceId) {
                             if (merchantId !== '-') {
                                 return chrome.getUrlHtml('https://sellercentral.' + amazonHost + '/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] + '&merchantId=' + merchantId);
                             } else {
                                 console.log("merchantId: " + merchantId + " 匹配出错！！！");
+                                uploadMission.listingUrl = "";
                                 chrome.quit();
-                                uploadMission.listingUrl = '';
                                 return merchantId;
                             }
                         } else {
-                            return new Promise(function(resolve, reject){resolve('"marketplaceId": "' + marketplaceId + '"');});
+                            return new Promise(function(resolve, reject){resolve('"marketplaceId":"' + marketplaceId + '"');});
                         }
                     } else {
                         console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
+                        uploadMission.listingUrl = "";
                         chrome.quit();
-                        uploadMission.listingUrl='';
                         return marketplaceId;
                     }
                 }).then((ret) => {
-                    if (marketID[uploadMission.amzSite] === getTextByReg(ret, /(?<=data-marketplace_selection=")(.*?)(?=")/g, 0)) { //再次验证 看是否已经跳转
+                    if (marketID[uploadMission.amzSite] === getTextByReg(ret, /(?<="marketplaceId":")(.*?)(?=")/g, 0)) { //再次验证 看是否已经跳转
                         if (uploadMission.amzUrl.indexOf('/disburse/submit') === -1) { //判断是否申请转账 还是上传产品
                             RcState = "准备上传(上传产品)";
                             console.log("准备上传(上传产品)", title);
