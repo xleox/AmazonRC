@@ -144,12 +144,10 @@ exports.getOrderCancelPageHtml = function () {
 }
 exports.getInventoryPageHtml = function () {
     driver.manage().window().maximize();
-    return driver.get('https://sellercentral.'+amazonHost+'/inventory/ref=xx_invmgr_dnav_xx').then(()=>{
-        sleep.msleep(5*1000);
-        return driver.findElement(By.xpath('//*[@id="FULFILLMENT_SECTION"]/ul/li[3]/div/span/div/label/input[@value="FulfilledByAmazon"]')).click().then(()=>{
-            sleep.msleep(15*1000);
-            return driver.getPageSource();
-        })
+    // https://sellercentral.amazon.com/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx
+    return driver.get('https://sellercentral.'+amazonHost+'/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx').then(()=>{
+        sleep.msleep(15*1000);
+        return driver.getPageSource();
     });
 };
 exports.sendItems = function (url, trackIDs) {
