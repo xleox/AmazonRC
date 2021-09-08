@@ -162,7 +162,7 @@ exports.sendItems = function (url, trackIDs) {
         console.log("准备发货");
         sleep.msleep(8*1000);
         return driver.getPageSource().then(pageHtml => {
-            sleep.msleep(8*1000);
+            sleep.msleep(10*1000);
             if (pageHtml.match(/name="BulkConfirmShipment-ShipFromDropdown"/g) !== null) {
                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
                     sleep.msleep(1000);
