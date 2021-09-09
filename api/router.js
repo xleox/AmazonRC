@@ -1,146 +1,125 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const chrome = require('./seleSaveAndControl');
-const moment = require('moment');
-const http = require('http');
-const fs = require('fs');
+const chrome = require("./seleSaveAndControl");
+const moment = require("moment");
+const http = require("http");
+const fs = require("fs");
+const sleep = require("sleep");
 const Promise = require("bluebird");
-const config = require('./setting').config;
-const 版本={
-    代号:'2.0.9.0',
-    名称:'牛刀'
-}
-const sleep = require('sleep');
+const config = require("./setting").config;
+
+const 版本 = { "代号": "2.0.9.0", "名称": "牛刀" }
 let RcState = "";
 let RcBusy = false;
-let merchantId = "";  //用户在亚马逊的唯一标识之一 可以用来切换店铺
-let marketplaceId = "";  //店铺ID
+let merchantId = "";  // 用户在亚马逊的唯一标识之一 可以用来切换店铺
+let marketplaceId = "";  // 店铺ID
 let amazonHost="amazon.com";
-if(config.站点 != undefined)
-    amazonHost=config.站点;
+if(config["站点"] !== undefined) amazonHost=config["站点"];
+let deliverMission = { url: "", items: [] };
+let uploadMission = { amzUrl: "", amzSite: "", listingUrl: "" };
+let readMission = [];
 
-let deliverMission = {
-    url:"",
-    items:[]
-};
-let uploadMission={
-    amzUrl:'',
-    amzSite:'',
-    listingUrl:''
-};
-let readMission=[];
+// 添加任务
 let addReadMission = function (url, saveFile) {
-    for(var i=0;i<readMission.length;i++){
-        if(readMission[i].url == url && readMission[i].saveFile == saveFile)
-            return '任务已在列表中';
+    for (let i = 0; i < readMission.length; i++) {
+        if(readMission[i].url === url && readMission[i].saveFile === saveFile) return "任务已在列表中";
     }
-    readMission.push({url:url,saveFile:saveFile});
-    return '添加成功';
+    readMission.push({url: url, saveFile: saveFile});
+    return "添加成功";
 }
 
-let readUrlThenSave=function (url,saveFile) {
-    return chrome.getUrlHtml(url).then(
-        html=>{
-            fs.writeFileSync("./public/"+saveFile+".txt",html);
-            return new Promise(function(resolve, reject){resolve('done');});
-        });
+let readUrlThenSave = function (url, saveFile) {
+    return chrome.getUrlHtml(url).then(html => {
+        fs.writeFileSync("./public/" + saveFile + ".txt", html);
+        return new Promise(function(resolve, reject){ resolve("done"); });
+    });
 }
-router.post('/addReadMisson',(req,res)=>{
-    //console.log(req.body);
-    if(req.body.url == undefined || req.body.saveFile == undefined)
-    {
-        res.send('格式错误');
+router.post("/addReadMisson",(req,res) => {
+    if (req.body.url === undefined || req.body.saveFile === undefined) {
+        res.send("格式错误");
         return;
     }
-    if(req.body.url == '' || req.body.saveFile == '')
-    {
-        res.send('格式错误');
+    if (req.body.url === "" || req.body.saveFile === "") {
+        res.send("格式错误");
         return;
     }
-    res.send(addReadMission(req.body.url,req.body.saveFile));
+    res.send(addReadMission(req.body.url, req.body.saveFile));
 });
-router.post('/addUploadMission',(req,res)=>{
-    //console.log(req.body);
-    if(req.body.amzUrl == undefined || req.body.listingUrl == undefined)
-    {
-        res.send('格式错误');
+router.post("/addUploadMission",(req,res) => {
+    if (req.body.amzUrl === undefined || req.body.listingUrl === undefined) {
+        res.send("格式错误");
         return;
     }
-    if(req.body.amzUrl == '' || req.body.listingUrl == '')
-    {
-        res.send('格式错误');
+    if (req.body.amzUrl === "" || req.body.listingUrl === "") {
+        res.send("格式错误");
         return;
     }
-    if(req.body.amzSite != undefined)
-        uploadMission.amzSite = req.body.amzSite;
-    else
-        uploadMission.amzSite = 'www.amazon.com';
-
-    uploadMission.amzUrl=req.body.amzUrl;
-    uploadMission.listingUrl=req.body.listingUrl;
-    res.send('ok');
+    if (req.body.amzSite !== undefined) uploadMission.amzSite = req.body.amzSite;
+    else uploadMission.amzSite = "www.amazon.com";
+    uploadMission.amzUrl = req.body.amzUrl;
+    uploadMission.listingUrl = req.body.listingUrl;
+    res.send("ok");
 });
-router.get('/',(req,res)=>{
-    res.send('Amazon Control Sever Start');
+router.get("/",(req,res) => {
+    res.send("Amazon Control Sever Start");
 });
-router.get('/readMission',(req,res)=>{
+router.get('/readMission',(req,res) => {
     res.send(readMission);
 });
-var getBaseInf = function () {
-    if(RcBusy)return;
-    RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},360*1000);
-    RcState="正在打开页面";
-    chrome.amazonLogin(config.账户,config.密码)
-        .then(title => {
-            if(title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 ){
-                RcState="两步验证，需要协助登陆";
-                console.log("两步验证，需要协助登陆" , title);
-                return title;
+
+let getBaseInf = function () {
+    if (RcBusy) return;
+    RcBusy = true;
+    setTimeout(() => { chrome.quit(); RcBusy = false; RcState = "空闲"; },360 * 1000);
+    RcState = "正在打开页面";
+    chrome.amazonLogin(config.账户, config.密码).then(title => {
+        if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 ) {
+            RcState = "两步验证，需要协助登陆";
+            console.log("两步验证，需要协助登陆" , title);
+            return title;
+        }
+        RcState = "登陆成功";
+        console.log("登陆成功", title);
+        sleep.msleep(6 * 1000);
+        chrome.getHomePageHtml().then(homeHtml => {
+            RcState = "读取首页信息";
+            if (merchantId === "" || merchantId === "-") {
+                merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
             }
-            RcState="登陆成功";
-            console.log("登陆成功" , title);
-            sleep.msleep(6*1000);
-            chrome.getHomePageHtml().then(homeHtml=>{
-                RcState="读取首页信息";
-                if(merchantId === "" || merchantId === "-") {
-                    merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
-                }
-                marketplaceId = getTextByReg(homeHtml, /(?<="marketplaceId":")(.*?)(?=")/g, 0);
-                if (amazonHost === 'amazon.com' && marketplaceId !== "ATVPDKIKX0DER") {
-                    console.log('美国店铺首页不是美国站，正在跳转');
-                    RcState='美国店铺首页不是美国站，正在跳转';
-                    return chrome.getUrlHtml('https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=ATVPDKIKX0DER&merchantId=' + merchantId);
-                }
-                if (amazonHost === 'amazon.co.uk' && marketplaceId !== "A1F83G8C2ARO7P") {
-                    console.log('欧洲店铺首页不是英国站，正在跳转');
-                    RcState='欧洲店铺首页不是英国站，正在跳转';
-                    return chrome.getUrlHtml('https://sellercentral.amazon.co.uk/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=' + merchantId);
-                }
-                // console.log(marketplaceId, merchantId);
-                return new Promise(function(resolve, reject){resolve(homeHtml);});
-            }).then(homeHtml=>{
-                chrome.getOrderPageHtml().then(Orderhtml=>{
-                    RcState="读取未发货信息";
-                    return new Promise(function(resolve, reject){resolve(homeHtml + Orderhtml);});
-                }).then(homeOrderHtml=>{
-                    chrome.getOrderCancelPageHtml().then(Cancelhtml=>{
-                        RcState="读取已取消信息";
-                        return new Promise(function(resolve, reject){resolve(homeOrderHtml + Cancelhtml);});
-                    }).then(homeOrderCancelHtml=>{
-                    chrome.getOrderShippedPageHtml().then(ShipedOrderhtml=> {
-                        var t='<chinaTime>'+moment().format('YYYY-MM-DD HH:mm:ss')+'</chinaTime>';
-                        var v='<verNumber>'+版本.代号+'</verNumber>';
-                        var n='<verName>'+版本.名称+'</verName>';
-                        fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderCancelHtml + ShipedOrderhtml + t + v + n);
-                        RcState="读取已订单信息并保存";
+            marketplaceId = getTextByReg(homeHtml, /(?<="marketplaceId":")(.*?)(?=")/g, 0);
+            if (amazonHost === "amazon.com" && marketplaceId !== "ATVPDKIKX0DER") {
+                console.log("美国店铺首页不是美国站，正在跳转");
+                RcState = "美国店铺首页不是美国站，正在跳转";
+                return chrome.getUrlHtml("https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=ATVPDKIKX0DER&merchantId=" + merchantId);
+            }
+            if (amazonHost === "amazon.co.uk" && marketplaceId !== "A1F83G8C2ARO7P") {
+                console.log("欧洲店铺首页不是英国站，正在跳转");
+                RcState = "欧洲店铺首页不是英国站，正在跳转";
+                return chrome.getUrlHtml("https://sellercentral.amazon.co.uk/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=" + merchantId);
+            }
+            return new Promise(function(resolve, reject){ resolve(homeHtml); });
+        }).then(homeHtml => {
+            chrome.getOrderPageHtml().then(orderHtml => {
+                RcState = "读取未发货信息";
+                return new Promise(function(resolve, reject){ resolve(homeHtml + orderHtml); });
+            }).then(homeOrderHtml => {
+                chrome.getOrderCancelPageHtml().then(cancelHtml => {
+                    RcState = "读取已取消信息";
+                    return new Promise(function(resolve, reject){ resolve(homeOrderHtml + cancelHtml); });
+                }).then(homeOrderCancelHtml => {
+                    chrome.getOrderShippedPageHtml().then(shippedOrderHtml => {
+                        let t = "<chinaTime>" + moment().format("YYYY-MM-DD HH:mm:ss") + "</chinaTime>";
+                        let v = "<verNumber>" + 版本.代号 + "</verNumber>";
+                        let n = "<verName>" + 版本.名称 + "</verName>";
+                        fs.writeFileSync("./public/homeAndOrderPage.txt",homeOrderCancelHtml + shippedOrderHtml + t + v + n);
+                        RcState = "读取已订单信息并保存";
                         if (config["FBA"] && readMission.length === 0) {
                             chrome.getInventoryPageHtml().then(InventoryHtml => {
-                                RcState="读取FBA库存信息";
+                                RcState = "读取FBA库存信息";
                                 let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, "").replace(/<script.*?<\/script>/g, "");
                                 let canceledUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false";
                                 chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
-                                    RcState="读取FBA已取消订单信息";
+                                    RcState = "读取FBA已取消订单信息";
                                     let allUrl = "https://sellercentral." + amazonHost + "/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false";
                                     chrome.getUrlHtml(allUrl).then(allOrderHtml => {
                                         RcState="读取FBA所有订单信息";
@@ -150,31 +129,28 @@ var getBaseInf = function () {
                                 })
                             })
                         }
-                        if(readMission.length>0)
-                        readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret=>{
-                            RcState="完成第一个读取任务";
-                            readMission.splice(0,1);
-                            if(readMission.length>0)
-                            return readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret=>{
-                                RcState="完成第二个读取任务";
+                        if(readMission.length > 0) {
+                            readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(ret => {
+                                RcState = "完成第一个读取任务";
                                 readMission.splice(0,1);
-                                if(readMission.length>0)
-                                return readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(
-                                    ret=>{readMission.splice(0,1);RcState="完成第三个读取任务";
-                                });
+                                if(readMission.length > 0) {
+                                    return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(ret => {
+                                        RcState="完成第二个读取任务";
+                                        readMission.splice(0,1);
+                                        if(readMission.length > 0) {
+                                            return readUrlThenSave(readMission[0].url,readMission[0].saveFile).then(ret => {
+                                                readMission.splice(0,1);
+                                                RcState = "完成第三个读取任务";
+                                            });
+                                        }
+                                    });
+                                }
                             });
-
-                    });
+                        }
                     });
                 })
             });
-        })
-        .catch(err => {
-            chrome.quit();
-            console.log("登陆错误" , err);
-            RcState="登陆错误";
-            RcBusy=false;
-        });
+        }).catch(err => { chrome.quit(); console.log("登陆错误" , err); RcState = "登陆错误"; RcBusy = false; });
     });
 }
 
@@ -186,7 +162,7 @@ var sendItems = function () {
     if (RcBusy) return;
     if (deliverMission.items.length === 0) return;
     RcBusy = true;
-    setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 120 * 1000);
+    setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 180 * 1000);
 
     var orderIDs = "";
     var nowItems = deliverMission.items;
