@@ -8,7 +8,7 @@ const sleep = require("sleep");
 const Promise = require("bluebird");
 const config = require("./setting").config;
 
-const 版本 = { "代号": "2.0.9.0", "名称": "牛刀" }
+const 版本 = { "代号": "2.0.9.1", "名称": "牛刀" }
 let RcState = "";
 let RcBusy = false;
 let merchantId = "";  // 用户在亚马逊的唯一标识之一 可以用来切换店铺
@@ -158,16 +158,16 @@ getBaseInf();  //启动先打开。。。。。。。。。。
 setInterval(()=>{getBaseInf()}, 600 * 1000);
 setInterval(()=>{sendItems()}, 3 * 60 * 1000);
 setInterval(()=>{uploadListing()}, 35*1000);
-var sendItems = function () {
+let sendItems = function () {
     if (RcBusy) return;
     if (deliverMission.items.length === 0) return;
     RcBusy = true;
     setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 180 * 1000);
 
-    var orderIDs = "";
-    var nowItems = deliverMission.items;
-    var plan2SendItems = [];
-    var delItems = function (orderID) {
+    let orderIDs = "";
+    let nowItems = deliverMission.items;
+    let plan2SendItems = [];
+    let delItems = function (orderID) {
         for (let i = 0; i < nowItems.length; i++)
             if (nowItems[i].orderID === orderID) {
                 nowItems.splice(i, 1);
