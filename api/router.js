@@ -63,10 +63,9 @@ router.post("/addUploadMission",(req,res) => {
 router.get("/",(req,res) => {
     res.send("Amazon Control Sever Start");
 });
-router.get('/readMission',(req,res) => {
+router.get("/readMission",(req,res) => {
     res.send(readMission);
 });
-
 let getBaseInf = function () {
     if (RcBusy) return;
     RcBusy = true;
@@ -153,132 +152,74 @@ let getBaseInf = function () {
         }).catch(err => { chrome.quit(); console.log("登陆错误" , err); RcState = "登陆错误"; RcBusy = false; });
     });
 }
-
-getBaseInf();  //启动先打开。。。。。。。。。。
-setInterval(()=>{getBaseInf()}, 600 * 1000);
-setInterval(()=>{sendItems()}, 3 * 60 * 1000);
-setInterval(()=>{uploadListing()}, 35*1000);
+// 启动先打开。。。。。。。。。。
+getBaseInf();
+setInterval(() => { getBaseInf() }, 600 * 1000);
+setInterval(() => { sendItems() }, 3 * 60 * 1000);
+setInterval(() => { uploadListing() }, 35 * 1000);
 let sendItems = function () {
     if (RcBusy) return;
     if (deliverMission.items.length === 0) return;
     RcBusy = true;
     setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 180 * 1000);
-
     let orderIDs = "";
     let nowItems = deliverMission.items;
     let plan2SendItems = [];
     let delItems = function (orderID) {
         for (let i = 0; i < nowItems.length; i++)
-            if (nowItems[i].orderID === orderID) {
-                nowItems.splice(i, 1);
-            }
+            if (nowItems[i].orderID === orderID) { nowItems.splice(i, 1); }
     };
-    var initSelectName = deliverMission.items[0].selectName , initCompanyName = deliverMission.items[0].companyName;
-    //把要发货的从系统发货数组里转移到计划里
+    let initSelectName = deliverMission.items[0].selectName , initCompanyName = deliverMission.items[0].companyName;
+    // 把要发货的从系统发货数组里转移到计划里
     for(let i = 0; i < nowItems.length; i++)
         if(nowItems[i].selectName === initSelectName && nowItems[i].companyName === initCompanyName){
             orderIDs = orderIDs +  nowItems[i].orderID + ";";
             plan2SendItems.push(nowItems[i]);
         }
-    //把系统变量里的删除掉
-    for(var i=0;i<plan2SendItems.length;i++) delItems(plan2SendItems[i].orderID)
-
-    var sendItemsUrl = deliverMission.url + orderIDs;
-
-    /*console.log(orderIDs);
-    RcBusy=false;
-    console.log("计划发货",plan2SendItems);
-    console.log("剩余发货",deliverMission.items);*/
-
-    RcState="正在打开页面(发货)";
-    console.log("发货单号",orderIDs);
-    chrome.amazonLogin(config.账户,config.密码)
-        .then(title => {
-            if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
-                RcState = "两步验证，需要协助登陆";
-                console.log("两步验证，需要协助登陆", title);
-                return title;
-            }
-            RcState = "登陆成功(发货)";
-            console.log("登陆成功(发货)", title);
-            chrome.sendItems(sendItemsUrl,plan2SendItems);
-        });
-}
-/*var sendItems=function () {
-    if(RcBusy)return;
-    if(deliverMission.items.length == 0)return;
-    RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},90*1000);
-
-    var orderIDs = "";
-    var items=deliverMission.items;
-    var isHaveUSPS = false;
-
-    for(var i=0;i<items.length;i++)
-        if(items[i].trackID.length == 16)
-            {isHaveUSPS = true;break;}
-    if(isHaveUSPS)
-    {
-        var newDeliverMission = [];
-        for(var i=0;i<items.length;i++){
-            if(items[i].trackID.length == 16)
-                orderIDs = orderIDs +  items[i].orderID + ";";
-            else
-                newDeliverMission.push(items[i]);
+    // 把系统变量里的删除掉
+    for(let i = 0; i < plan2SendItems.length; i++) delItems(plan2SendItems[i].orderID);
+    let sendItemsUrl = deliverMission.url + orderIDs;
+    RcState = "正在打开页面(发货)";
+    console.log("发货单号", orderIDs);
+    chrome.amazonLogin(config.账户, config.密码).then(title => {
+        if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
+            RcState = "两步验证，需要协助登陆";
+            console.log("两步验证，需要协助登陆", title);
+            return title;
         }
-        deliverMission.items=newDeliverMission;  //不是USPS的订单摘录出来重新赋值
-    }else {
-        for(var i=0;i<items.length;i++)
-            orderIDs = orderIDs +  items[i].orderID + ";";
-        deliverMission.items=[];
-    }
-
-    var sendItemsUrl = deliverMission.url + orderIDs;
-
-    RcState="正在打开页面(发货)";
-    console.log("发货单号",orderIDs);
-    chrome.amazonLogin(config.账户,config.密码)
-        .then(title => {
-            if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
-                RcState = "两步验证，需要协助登陆";
-                console.log("两步验证，需要协助登陆", title);
-                return title;
-            }
-            RcState = "登陆成功(发货)";
-            console.log("登陆成功(发货)", title);
-            chrome.sendItems(sendItemsUrl,items);
-        });
-}*/
-var uploadListing=function () {
-    if(RcBusy)return;
-    if(uploadMission.amzUrl == '' || uploadMission.listingUrl == '' )return;
-    RcBusy=true;
-    setTimeout(()=>{chrome.quit();RcBusy=false;RcState="空闲";},150*1000);
+        RcState = "登陆成功(发货)";
+        console.log("登陆成功(发货)", title);
+        chrome.sendItems(sendItemsUrl, plan2SendItems);
+    });
+}
+let uploadListing = function () {
+    if (RcBusy) return;
+    if (uploadMission.amzUrl === "" || uploadMission.listingUrl === "" ) return;
+    RcBusy = true;
+    setTimeout(() => { chrome.quit(); RcBusy = false; RcState = "空闲"; },150 * 1000);
     let marketID = {
-        'www.amazon.com':'ATVPDKIKX0DER',
-        'www.amazon.ca':'A2EUQ1WTGCTBG2',
-        'www.amazon.com.mx':'A1AM78C64UM0Y8',
-        'www.amazon.co.jp':'A1VC38T7YXB528',
-        'www.amazon.co.uk':'A1F83G8C2ARO7P',
-        'www.amazon.de':'A1PA6795UKMFR9',
-        'www.amazon.fr':'A13V1IB3VIYZZH',
-        'www.amazon.it':'APJ6JRA9NG5V4',
-        'www.amazon.es':'A1RKKUPIHCS9HS',
-        'www.amazon.com.au':'A39IBJ37TRP1C6'
+        "www.amazon.com": "ATVPDKIKX0DER",
+        "www.amazon.ca": "A2EUQ1WTGCTBG2",
+        "www.amazon.com.mx": "A1AM78C64UM0Y8",
+        "www.amazon.co.jp": "A1VC38T7YXB528",
+        "www.amazon.co.uk": "A1F83G8C2ARO7P",
+        "www.amazon.de": "A1PA6795UKMFR9",
+        "www.amazon.fr": "A13V1IB3VIYZZH",
+        "www.amazon.it": "APJ6JRA9NG5V4",
+        "www.amazon.es": "A1RKKUPIHCS9HS",
+        "www.amazon.com.au": "A39IBJ37TRP1C6"
     }
     /**
      * 下载文件
-     * 。。。。
-     */
-    //console.log(moment().format("YYYY-MM-DD_hh-mm-ss"));
-    var listingName=moment().format("YYYY-MM-DD_hh-mm-ss")+".xls";
-    var listingPath=__dirname.replace('api','public\\'+listingName);
-    RcState="开始下载listing(上传产品)";
-    download(uploadMission.listingUrl,"./public/"+listingName,(function (ret) {
-        if(ret) {
+     **/
+    let listingName = moment().format("YYYY-MM-DD_hh-mm-ss") + ".xls";
+    let listingPath = __dirname.replace("api", "public\\" + listingName);
+    RcState = "开始下载listing(上传产品)";
+    download(uploadMission.listingUrl, "./public/" + listingName, (function (ret) {
+        if (ret) {
             console.log('下载listing完成', listingPath);
             RcState = "正在打开页面(上传产品/申请转账)";
-            chrome.amazonLogin(config.账户,config.密码).then(title => {
+            chrome.amazonLogin(config.账户, config.密码).then(title => {
                 if (title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0) {
                     RcState = "两步验证，需要协助登陆";
                     console.log("两步验证，需要协助登陆", title);
@@ -287,24 +228,19 @@ var uploadListing=function () {
                 RcState = "登陆成功(上传产品/申请转账)";
                 console.log("登陆成功(上传产品/申请转账)", title);
                 chrome.getHomePageHtml().then(homeHtml => {
-                    if(merchantId === "" || merchantId === "-") {
-                        merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
-                    }
+                    if(merchantId === "" || merchantId === "-") merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
                     marketplaceId = getTextByReg(homeHtml, /(?<=data-marketplace_selection=")(.*?)(?=")/g, 0);
-                    //console.log(merchantId, marketplaceId);
                     if (marketplaceId !== "-") {
-                        if(marketID[uploadMission.amzSite] !== marketplaceId) {
+                        if (marketID[uploadMission.amzSite] !== marketplaceId) {
                             if (merchantId !== '-') {
-                                return chrome.getUrlHtml('https://sellercentral.' + amazonHost + '/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId='+ marketID[uploadMission.amzSite] + '&merchantId=' + merchantId);
+                                return chrome.getUrlHtml('https://sellercentral.' + amazonHost + '/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=' + marketID[uploadMission.amzSite] + '&merchantId=' + merchantId);
                             } else {
                                 console.log("merchantId: " + merchantId + " 匹配出错！！！");
                                 uploadMission.listingUrl = "";
                                 chrome.quit();
                                 return merchantId;
                             }
-                        } else {
-                            return new Promise(function(resolve, reject){resolve('"marketplaceId":"' + marketplaceId + '"');});
-                        }
+                        } else return new Promise(function(resolve, reject){ resolve('"marketplaceId":"' + marketplaceId + '"'); });
                     } else {
                         console.log("marketplaceID: " + marketplaceId + " 匹配出错！！！");
                         uploadMission.listingUrl = "";
@@ -317,7 +253,7 @@ var uploadListing=function () {
                             RcState = "准备上传(上传产品)";
                             console.log("准备上传(上传产品)", title);
                             chrome.uploadListing(uploadMission.amzUrl, listingPath, uploadMission.amzSite);
-                            uploadMission.listingUrl = '';
+                            uploadMission.listingUrl = "";
                         } else {
                             RcState = "申请转账";
                             console.log("申请转账", title);
@@ -328,11 +264,11 @@ var uploadListing=function () {
                                 let transferAmount = "";
                                 if (withdrawHtml !== null) transferAmount = withdrawHtml[0];
                                 else transferAmount = "-";
-                                let options = {flag: "a+"};
+                                let options = { flag: "a+" };
                                 let saveInfo = '{"转账时间": "' + datetime + '", "转账站点": "' + uploadMission.amzSite + '", "转账金额": "' + transferAmount + '"}\n';
                                 fs.writeFileSync("./public/withdraw.txt", saveInfo, options);
                                 uploadMission.listingUrl = "";
-                                return new Promise(function(resolve, reject){resolve('done');});
+                                return new Promise(function(resolve, reject){ resolve('done'); });
                             });
                         }
                     } else {
@@ -350,58 +286,32 @@ var uploadListing=function () {
         }
     }))
 };
-router.get('/quit',(req,res) => {
+router.get("/quit",(req,res) => {
     chrome.quit();
     res.send("quit");
 });
-router.get('/upload',(req,res) => {
+router.get("/upload",(req,res) => {
     uploadListing();
     res.send("uploadListing");
 });
-router.get('/order',(req,res) => {
+router.get("/order",(req,res) => {
     chrome.getOderInf();
     res.send("check please");
 });
-router.get('/send',(req,res) => {
+router.get("/send",(req,res) => {
     sendItems();
     res.send("check please");
 });
-/*
-let addDeliverMission = function (orderID, trackID) {
-    for(var i=0;i<deliverMission.items.length;i++){
-        if(deliverMission.items[i].orderID == orderID){
-            deliverMission.items[i].trackID = trackID;
-            return "该订单已存在，并修改";
-        }
-    }
-    deliverMission.items.push({orderID:orderID,trackID:trackID});
-    return '添加成功';
-}
-router.post('/sendItem',(req,res) => {
-    //console.log(req.body.url);
-    //console.log(req.body.items);
-    if(req.body.url != undefined && req.body.items != undefined){
-        deliverMission.url=req.body.url;
-        var items = JSON.parse(req.body.items);
-
-        for(var i=0;i<items.length;i++)
-            addDeliverMission(items[i].orderID,items[i].trackID);
-        res.send("ok");
-    }else
-        res.send("check please");
-});*/
-router.post('/sendItem',(req,res) => {
+router.post("/sendItem",(req,res) => {
     let isInDeliverMission = function (orderID) {
-        for(let i=0;i<deliverMission.items.length;i++)
-            if(deliverMission.items[i].orderID == orderID) return i;
+        for(let i = 0; i < deliverMission.items.length; i++) if (deliverMission.items[i].orderID === orderID) return i;
         return -1;
     };
-    if(req.body.url != undefined && req.body.items != undefined){
+    if (req.body.url !== undefined && req.body.items !== undefined) {
         deliverMission.url = req.body.url;
-        var items = JSON.parse(req.body.items);
-
-        for(let i=0;i<items.length;i++)
-            if (isInDeliverMission(items[i].orderID) == -1) {
+        let items = JSON.parse(req.body.items);
+        for (let i = 0; i < items.length; i++) {
+            if (isInDeliverMission(items[i].orderID) === -1) {
                 deliverMission.items.push({
                     orderID: items[i].orderID,
                     trackID: items[i].trackID,
@@ -410,33 +320,32 @@ router.post('/sendItem',(req,res) => {
                     serviceSelect: items[i].serviceSelect,
                     serviceContent: items[i].serviceContent,
                 });
-            }else{
+            } else {
                 deliverMission.items[i].trackID = items[i].trackID;
                 deliverMission.items[i].selectName = items[i].selectName;
                 deliverMission.items[i].companyName = items[i].companyName;
                 deliverMission.items[i].serviceSelect = items[i].serviceSelect;
                 deliverMission.items[i].serviceContent = items[i].serviceContent;
             }
-        //console.log(deliverMission);
+        }
         res.send("ok");
-    }else
-        res.send("check please");
+    } else res.send("check please");
 });
-router.get('/state',(req,res) => {
-    res.send({"busy":RcBusy,"state":RcState,"delivery":deliverMission,"readMission":readMission ,'uploadMission':uploadMission});
+router.get("/state",(req,res) => {
+    res.send({ "busy": RcBusy, "state": RcState, "delivery": deliverMission, "readMission": readMission ,"uploadMission": uploadMission });
 });
 function download (url, dest, cb) {
-    var file = fs.createWriteStream(dest);
+    let file = fs.createWriteStream(dest);
     http.get(url, function(response) {
-            response.pipe(file);
-            file.on('finish', function() {
-                cb(true);  // close() is async, call cb after close completes.
-            });
-        }).on('error', function(err) { // Handle errors
-            fs.unlink(dest); // Delete the file async. (But we don't check the result)
-            cb(false);
+        response.pipe(file);
+        file.on('finish', function() {
+            cb(true);  // close() is async, call cb after close completes.
         });
-    };
+    }).on('error', function(err) { // Handle errors
+        fs.unlink(dest); // Delete the file async. (But we don't check the result)
+        cb(false);
+    });
+}
 /**
  * 用正则表达式搜索字符
  * @param text 正文
@@ -447,8 +356,7 @@ function download (url, dest, cb) {
 let getTextByReg = function (text, reg, i) {
     let regMatch = text.match(reg);
     if(regMatch !== null)
-        if(regMatch[i] !== undefined)
-            return regMatch[i];
+        if(regMatch[i] !== undefined) return regMatch[i];
     return "-"
 };
 module.exports = router;
