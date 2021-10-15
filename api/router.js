@@ -155,13 +155,13 @@ let getBaseInf = function () {
 // 启动先打开。。。。。。。。。。
 getBaseInf();
 setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
-setInterval(() => { sendItems() }, 5 * 60 * 1000);
+setInterval(() => { sendItems() }, 4 * 60 * 1000);
 setInterval(() => { uploadListing() }, 35 * 1000);
 let sendItems = function () {
     if (RcBusy) return;
     if (deliverMission.items.length === 0) return;
     RcBusy = true;
-    setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 180 * 1000);
+    setTimeout(()=>{chrome.quit(); RcBusy = false; RcState = "空闲";}, 3 * 60 * 1000);
     let orderIDs = "";
     let nowItems = deliverMission.items;
     let plan2SendItems = [];
