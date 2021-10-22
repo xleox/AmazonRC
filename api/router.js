@@ -8,7 +8,7 @@ const sleep = require("sleep");
 const Promise = require("bluebird");
 const config = require("./setting").config;
 
-const 版本 = { "代号": "2.0.9.3", "名称": "牛刀" }
+const 版本 = { "代号": "2.0.9.4", "名称": "牛刀" }
 let RcState = "";
 let RcBusy = false;
 let merchantId = "";  // 用户在亚马逊的唯一标识之一 可以用来切换店铺
@@ -153,7 +153,7 @@ let getBaseInf = function () {
     });
 }
 // 启动先打开。。。。。。。。。。
-getBaseInf();
+// getBaseInf();
 setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
 setInterval(() => { sendItems() }, 4 * 60 * 1000);
 setInterval(() => { uploadListing() }, 35 * 1000);
