@@ -153,7 +153,7 @@ let getBaseInf = function () {
     });
 }
 // 启动先打开。。。。。。。。。。
-// getBaseInf();
+getBaseInf();
 setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
 setInterval(() => { sendItems() }, 4 * 60 * 1000);
 setInterval(() => { uploadListing() }, 35 * 1000);
