@@ -161,7 +161,13 @@ exports.sendItems = function (url, trackIDs) {
                                             if (trackIDs[0].serviceSelect !== "其他") {
                                                 return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret7 => {
                                                     sleep.msleep(2 * 1000);
-                                                    return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                                                    if (trackIDs[0].selectName === 'Yun Express') {
+                                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click().catch(() => {
+                                                            return driver.findElement(By.xpath('//a[contains(text(),"YunExpress Global Direct line (standard )-Tracked")]')).click();
+                                                        });
+                                                    } else {
+                                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                                                    }
                                                 })
                                             } else {
                                                 sleep.msleep(2 * 1000);
@@ -175,8 +181,9 @@ exports.sendItems = function (url, trackIDs) {
                                             sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
                                         }
                                         return Promise.all(sendMission).finally(() => {
-                                            sleep.msleep(5 * 1000);
-                                            return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                                            sleep.msleep(10 * 1000);
+                                            return driver.findElement(By.xpath('//*[text()="确认发货"]')).click();
+                                            // return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
                                         })
                                     })
                                 })
@@ -209,7 +216,13 @@ exports.sendItems = function (url, trackIDs) {
                                 if (trackIDs[0].serviceSelect !== "其他") {
                                     return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret6 => {
                                         sleep.msleep(2 * 1000);
-                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                                        if (trackIDs[0].selectName === 'Yun Express') {
+                                            return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click().catch(() => {
+                                                return driver.findElement(By.xpath('//a[contains(text(),"YunExpress Global Direct line (standard )-Tracked")]')).click();
+                                            });
+                                        } else {
+                                            return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                                        }
                                     })
                                 } else {
                                     return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
@@ -222,8 +235,9 @@ exports.sendItems = function (url, trackIDs) {
                                 sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
                             }
                             return Promise.all(sendMission).finally(() => {
-                                sleep.msleep(5 * 1000);
-                                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
+                                sleep.msleep(10 * 1000);
+                                return driver.findElement(By.xpath('//*[text()="确认发货"]')).click();
+                                // return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
                             })
                         })
                     })
