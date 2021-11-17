@@ -182,7 +182,16 @@ exports.sendItems = function (url, trackIDs) {
                                         }
                                         return Promise.all(sendMission).finally(() => {
                                             sleep.msleep(10 * 1000);
-                                            return driver.findElement(By.xpath('//*[text()="确认发货"]')).click();
+                                            // scrollIntoView 是一个与页面滚动相关的API，参数为true：页面滚动，使element的顶部与视图顶部对齐。参数为false：页面滚动，使element的底部与视图底部对齐
+                                            driver.executeScript('arguments[0].scrollIntoView(false);', driver.findElement(By.xpath('//*[@value="确认发货"]')));
+
+                                            // let { x, y } = driver.findElement(By.xpath('//*[@value="确认发货"]')).getRect();
+                                            // console.log(x, y);
+                                            // return driver.actions().move({x, y}).pause(3000).click().perform();
+
+                                            sleep.msleep(3 * 1000);
+
+                                            return driver.findElement(By.xpath('//*[@value="确认发货"]')).click();
                                             // return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
                                         })
                                     })
@@ -236,7 +245,16 @@ exports.sendItems = function (url, trackIDs) {
                             }
                             return Promise.all(sendMission).finally(() => {
                                 sleep.msleep(10 * 1000);
-                                return driver.findElement(By.xpath('//*[text()="确认发货"]')).click();
+                                // scrollIntoView 是一个与页面滚动相关的API，参数为true：页面滚动，使element的顶部与视图顶部对齐。参数为false：页面滚动，使element的底部与视图底部对齐
+                                driver.executeScript('arguments[0].scrollIntoView(false);', driver.findElement(By.xpath('//*[@value="确认发货"]')));
+
+                                // let { x, y } = driver.findElement(By.xpath('//*[@value="确认发货"]')).getRect();
+                                // console.log(x, y);
+                                // return driver.actions().move({x, y}).pause(3000).click().perform();
+
+                                sleep.msleep(3 * 1000);
+
+                                return driver.findElement(By.xpath('//*[@value="确认发货"]')).click();
                                 // return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
                             })
                         })
