@@ -119,151 +119,131 @@ exports.getInventoryPageHtml = function () {
         return driver.getPageSource();
     });
 };
-exports.sendItems = function (url, trackIDs) {
-    driver.get(url);
-    return driver.wait(() => {
-        return driver.getTitle().then(title => {            // 等待进入界面
-            if (title.indexOf("Manage Orders") >= 0 || title.indexOf("管理订单") >= 0 ) return title;
-            else return false;
-        })
-    }, 60 * 1000).then(title => {
-        sleep.msleep(30 * 1000);
-        return driver.getPageSource().then(pageHtml => {
-            if (pageHtml.indexOf("bulk-confirm-shipment-submit") !== -1) {
-                if (pageHtml.indexOf("BulkConfirmShipment-ShipFromDropdown") !== -1) {
-                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click().then(ret1 => {
-                        sleep.msleep(1000);
-                        return driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li') ).then(liRet => {
-                            sleep.msleep(1000);
-                            return driver.findElement(By.xpath('//*[@id="dropdown1_' + (liRet.length-1) + '"]')).click().then(ret2 => {
-                                sleep.msleep(1000);
-                                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click().then(ret3 => {
-                                    if (trackIDs[0].selectName === "其他") {
-                                        return driver.findElement(By.xpath('//*[@id="dropdown2_1"]')).click().then(retOther => {
-                                            sleep.msleep(1000);
-                                            return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
-                                        });
-                                    }
-                                }).then(testDoc => {
-                                    sleep.msleep(2 * 1000);
-                                    return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click().then(ret4 => {
-                                        sleep.msleep(2 * 1000);
-                                        if (trackIDs[0].selectName === "其他") {
-                                            return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).clear().then(ret5 => {
-                                                sleep.msleep(1000);
-                                                return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName).then(ret6 => {
-                                                    sleep.msleep(3 * 1000);
-                                                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
-                                                })
-                                            })
-                                        } else {
-                                            sleep.msleep(3 * 1000);
-                                            if (trackIDs[0].serviceSelect !== "其他") {
-                                                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret7 => {
-                                                    sleep.msleep(2 * 1000);
-                                                    if (trackIDs[0].selectName === 'Yun Express') {
-                                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click().catch(() => {
-                                                            return driver.findElement(By.xpath('//a[contains(text(),"YunExpress Global Direct line (standard )-Tracked")]')).click();
-                                                        });
-                                                    } else {
-                                                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
-                                                    }
-                                                })
-                                            } else {
-                                                sleep.msleep(2 * 1000);
-                                                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
-                                            }
-                                        }
-                                    }).then(ret5 => {
-                                        sleep.msleep(15 * 1000);
-                                        let sendMission = [];
-                                        for (let i=0; i < trackIDs.length; i++) {
-                                            sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
-                                        }
-                                        return Promise.all(sendMission).finally(() => {
-                                            sleep.msleep(10 * 1000);
-                                            // scrollIntoView 是一个与页面滚动相关的API，参数为true：页面滚动，使element的顶部与视图顶部对齐。参数为false：页面滚动，使element的底部与视图底部对齐
-                                            driver.executeScript('arguments[0].scrollIntoView(false);', driver.findElement(By.xpath('//*[@value="确认发货"]')));
-
-                                            // let { x, y } = driver.findElement(By.xpath('//*[@value="确认发货"]')).getRect();
-                                            // console.log(x, y);
-                                            // return driver.actions().move({x, y}).pause(3000).click().perform();
-
-                                            sleep.msleep(3 * 1000);
-
-                                            return driver.findElement(By.xpath('//*[@value="确认发货"]')).click();
-                                            // return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
-                                        })
-                                    })
-                                })
-                            })
-                        })
-                    })
-                } else {
-                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click().then(ret1 => {
-                        sleep.msleep(1000);
-                        if (trackIDs[0].selectName === "其他") {
-                            return driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click().then(retOther => {
-                                sleep.msleep(1000);
-                                return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click();
-                            });
-                        }
-                    }).then(oDoc => {
-                        sleep.msleep(2 * 1000);
-                        return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click().then(ret2 => {
-                            sleep.msleep(2 * 1000);
-                            if (trackIDs[0].selectName === "其他") {
-                                return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).clear().then(ret3 => {
-                                    sleep.msleep(2 * 1000);
-                                    return driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName).then(ret4 => {
-                                        sleep.msleep(3 * 1000);
-                                        return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
-                                    })
-                                })
-                            } else {
-                                sleep.msleep(3 * 1000);
-                                if (trackIDs[0].serviceSelect !== "其他") {
-                                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[1]/span/span')).click().then(ret6 => {
-                                        sleep.msleep(2 * 1000);
-                                        if (trackIDs[0].selectName === 'Yun Express') {
-                                            return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click().catch(() => {
-                                                return driver.findElement(By.xpath('//a[contains(text(),"YunExpress Global Direct line (standard )-Tracked")]')).click();
-                                            });
-                                        } else {
-                                            return driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
-                                        }
-                                    })
-                                } else {
-                                    return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
-                                }
-                            }
-                        }).then(ret7 => {
-                            sleep.msleep(15 * 1000);
-                            let sendMission = [];
-                            for (let i=0; i < trackIDs.length; i++) {
-                                sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "'+trackIDs[i].orderID+'")]/td[6]/span/input', trackIDs[i].trackID));
-                            }
-                            return Promise.all(sendMission).finally(() => {
-                                sleep.msleep(10 * 1000);
-                                // scrollIntoView 是一个与页面滚动相关的API，参数为true：页面滚动，使element的顶部与视图顶部对齐。参数为false：页面滚动，使element的底部与视图底部对齐
-                                driver.executeScript('arguments[0].scrollIntoView(false);', driver.findElement(By.xpath('//*[@value="确认发货"]')));
-
-                                // let { x, y } = driver.findElement(By.xpath('//*[@value="确认发货"]')).getRect();
-                                // console.log(x, y);
-                                // return driver.actions().move({x, y}).pause(3000).click().perform();
-
-                                sleep.msleep(3 * 1000);
-
-                                return driver.findElement(By.xpath('//*[@value="确认发货"]')).click();
-                                // return driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[4]/div/span/span/input')).click();
-                            })
-                        })
-                    })
+exports.sendItems = async function (url, trackIDs) {
+    // await driver.manage().window().setRect({x: 0, y: 0, width: 1920, height: 969});
+    await driver.manage().window().maximize();
+    await driver.get(url);
+    console.log('1 - 打开页面');
+    let pageTitle = await driver.getTitle();
+    if (pageTitle.match(/Manage Orders|管理订单/g) !== null) {
+        // console.log('页面标题：', pageTitle);
+        await sleep.msleep(30 * 1000);
+        let pageHtml = await driver.getPageSource();
+        if (pageHtml.indexOf('bulk-confirm-shipment-submit') !== -1) {
+            if (pageHtml.indexOf('BulkConfirmShipment-ShipFromDropdown') !== -1) {
+                await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/span/span/span')).click();
+                await sleep.msleep(1000);
+                let addressLi = await driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li'));
+                let addressIdx = addressLi.length - 1;
+                await sleep.msleep(1000);
+                await driver.findElement(By.xpath('//*[@id="dropdown1_' + addressIdx + '"]')).click();
+                console.log('2 - 地址选择');
+                await sleep.msleep(1000);
+                await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
+                await sleep.msleep(1000);
+                if (trackIDs[0].selectName === '其他') {
+                    await driver.findElement(By.xpath('//*[@id="dropdown2_1"]')).click();
+                    await sleep.msleep(1000);
+                    await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
                 }
-            } else return false;
-        })
-    })
+                await sleep.msleep(2 * 1000);
+                await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
+                console.log('3 - 承运人选择');
+                await sleep.msleep(2 * 1000);
+                if (trackIDs[0].selectName === '其他') {
+                    await driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).clear();
+                    await sleep.msleep(1000);
+                    await driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName);
+                    await sleep.msleep(3 * 1000);
+                    await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                    console.log('4 - 选择配送服务');
+                } else {
+                    if (trackIDs[0].serviceSelect !== '其他') {
+                        await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[1]/span/span')).click();
+                        await sleep.msleep(2 * 1000);
+                        if (trackIDs[0]['selectName'] === 'Yun Express') {
+                            try {
+                                await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                            } catch (e) {
+                                await driver.findElement(By.xpath('//a[contains(text(),"YunExpress Global Direct line (standard )-Tracked")]')).click();
+                            }
+                            console.log('4 - 选择配送服务');
+                        } else {
+                            await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                            console.log('4 - 选择配送服务');
+                        }
+                    } else {
+                        await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                        console.log('4 - 选择配送服务');
+                    }
+                }
+                await sleep.msleep(5 * 1000);
+                let sendMission = [];
+                for (let i = 0; i < trackIDs.length; i++) {
+                    sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "' + trackIDs[i].orderID + '")]/td[6]/span/input', trackIDs[i].trackID));
+                }
+                await Promise.all(sendMission);
+                console.log('5 - 填写发货编号');
+                await sleep.msleep(10 * 1000);
+                // scrollIntoView 是一个与页面滚动相关的API，参数为true：页面滚动，使element的顶部与视图顶部对齐。参数为false：页面滚动，使element的底部与视图底部对齐
+                await driver.executeScript('arguments[0].scrollIntoView(false);', driver.findElement(By.xpath('//*[@value="确认发货"]')));
+                console.log('6 - 调整页面滚动条');
+                await sleep.msleep(3 * 1000);
+                //*[@value="确认发货"]
+                await driver.findElement(By.xpath('//*[@data-test-id="bulk-confirm-shipment-submit"]')).click();
+                console.log('6 - 确认发货点击');
+                await sleep.msleep(3 * 1000);
+            } else {
+                await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click();
+                await sleep.msleep(1000);
+                if (trackIDs[0].selectName === '其他') {
+                    await driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                    await sleep.msleep(1000);
+                    await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span'));
+                }
+                await sleep.msleep(2 * 1000);
+                await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
+                await sleep.msleep(2 * 1000);
+                if (trackIDs[0].selectName === '其他') {
+                    await driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).clear();
+                    await sleep.msleep(2 * 1000);
+                    await driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName);
+                    await sleep.msleep(2 * 1000);
+                    await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                } else {
+                    if (trackIDs[0].serviceSelect !== '其他') {
+                        await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[1]/span/span')).click();
+                        await sleep.msleep(2 * 1000);
+                        if (trackIDs[0].selectName === 'Yun Express') {
+                            try {
+                                await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                            } catch (e) {
+                                await driver.findElement(By.xpath('//a[contains(text(),"YunExpress Global Direct line (standard )-Tracked")]')).click();
+                            }
+                        } else {
+                            await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].serviceSelect +'")]')).click();
+                        }
+                    } else {
+                        await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                    }
+                }
+                await sleep.msleep(5 * 1000);
+                let sendMission = [];
+                for (let i=0; i < trackIDs.length; i++) {
+                    sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "' + trackIDs[i].orderID + '")]/td[6]/span/input', trackIDs[i].trackID));
+                }
+                await Promise.all(sendMission);
+                await sleep.msleep(10 * 1000);
+                // scrollIntoView 是一个与页面滚动相关的API，参数为true：页面滚动，使element的顶部与视图顶部对齐。参数为false：页面滚动，使element的底部与视图底部对齐
+                await driver.executeScript('arguments[0].scrollIntoView(false);', driver.findElement(By.xpath('//*[@value="确认发货"]')));
+                await sleep.msleep(3 * 1000);
+                // await driver.findElement(By.xpath('//*[@value="确认发货"]')).click();
+                await driver.findElement(By.xpath('//*[@data-test-id="bulk-confirm-shipment-submit"]')).click();
+            }
+        } else { return false; }
+    } else { return false; }
 };
+// 上传表格/取款
 exports.uploadListing = function (url, filePath) {
     driver.get(url);
     return driver.wait(()=> {
