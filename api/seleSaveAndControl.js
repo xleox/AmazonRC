@@ -123,11 +123,11 @@ exports.sendItems = async function (url, trackIDs) {
     // await driver.manage().window().setRect({x: 0, y: 0, width: 1920, height: 969});
     await driver.manage().window().maximize();
     await driver.get(url);
-    // console.log('页面标题：', pageTitle);
     await sleep.msleep(30 * 1000);
-    console.log('1 - 打开页面');
     let pageTitle = await driver.getTitle();
     if (pageTitle.match(/Manage Orders|管理订单/g) !== null) {
+        console.log('1 - 打开页面');
+        // console.log('页面标题：', pageTitle);
         let pageHtml = await driver.getPageSource();
         if (pageHtml.indexOf('bulk-confirm-shipment-submit') !== -1) {
             if (pageHtml.indexOf('BulkConfirmShipment-ShipFromDropdown') !== -1) {
