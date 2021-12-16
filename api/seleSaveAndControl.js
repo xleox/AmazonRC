@@ -1,30 +1,29 @@
-const sleep = require("sleep");
-const webdriver = require("selenium-webdriver"),
+const sleep = require('sleep');
+const webdriver = require('selenium-webdriver'),
     By = webdriver.By,
     until = webdriver.until;
-const chrome = require("selenium-webdriver/chrome");
-const Promise = require("bluebird");
-const moment = require("moment");
-const config = require("./setting").config;
+const chrome = require('selenium-webdriver/chrome');
+const Promise = require('bluebird');
+const config = require('./setting').config;
 
 let driver;
-let amazonHost="amazon.com";
+let amazonHost = 'amazon.com';
 if (config.站点 !== undefined) amazonHost = config.站点;
 
 exports.amazonLogin = function (username, password) {
     let options = new chrome.Options();
-    if (amazonHost === "amazon.com") options.addArguments("user-data-dir=C:\\Chrome\\User Data\\");
-    else options.addArguments("user-data-dir=C:\\Chrome\\" + amazonHost + "\\");
+    if (amazonHost === 'amazon.com') options.addArguments('user-data-dir=C:\\Chrome\\User Data\\');
+    else options.addArguments('user-data-dir=C:\\Chrome\\' + amazonHost + '\\');
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
-    driver.get("http://sellercentral." + amazonHost + "/gp/homepage.html/ref=xx_home_logo_xx");
-    return driver.wait(()=> {
+    driver.get('http://sellercentral.' + amazonHost + '/gp/homepage.html/ref=xx_home_logo_xx');
+    return driver.wait(() => {
         return driver.getTitle().then( title => {  //等待进入界面
-            if (title.indexOf("Amazon") >= 0 || title.indexOf("亚马逊") >= 0 ) return title;
+            if (title.indexOf('Amazon') >= 0 || title.indexOf('亚马逊') >= 0) return title;
             else return false;
         });}, 60000).then( title => {
-            if (title.indexOf("登录") >= 0 || title.indexOf("Sign") >= 0 ) {
-                console.log("进入登陆界面");
+            if (title.indexOf('登录') >= 0 || title.indexOf('Sign') >= 0) {
+                console.log('进入登陆界面');
                 let xpaths = {
                     用户名: '//*[@id="ap_email"]',
                     密码: '//*[@id="ap_password"]',
@@ -32,12 +31,12 @@ exports.amazonLogin = function (username, password) {
                     登陆按钮: '//*[@id="signInSubmit"]',
                     选择账户: '//*[@id="ap-account-switcher-container"]/div[1]/div/div/div[2]/div[1]/div[2]/a/div/div[2]/div/div/div[2]'
                 };
-                sleep.msleep(10*1000); //实际用时延长
-                driver.findElements(By.xpath(xpaths.选择账户)).then(doc => { if(doc.length !== 0) driver.findElement(By.xpath(xpaths.选择账户)).click();});
+                sleep.msleep(10 * 1000); // 实际用时延长
+                driver.findElements(By.xpath(xpaths.选择账户)).then(doc => { if(doc.length !== 0) driver.findElement(By.xpath(xpaths.选择账户)).click(); });
                 driver.wait(until.elementLocated(By.xpath(xpaths.登陆按钮)), 60 * 1000).then(() => {
-                    driver.findElements(By.name("rememberMe")).then(doc => {
+                    driver.findElements(By.name('rememberMe')).then(doc => {
                         if(doc.length !== 0)
-                            driver.findElement(By.name("rememberMe")).isSelected().then( checked=>{ if(!checked) driver.findElement(By.name("rememberMe")).click(); });
+                            driver.findElement(By.name('rememberMe')).isSelected().then( checked=>{ if(!checked) driver.findElement(By.name('rememberMe')).click(); });
                     });
                     sleep.msleep(2 * 1000); //实际用时延长
                     Promise.all(inputTxtByXpath(xpaths.用户名, username), inputTxtByXpath(xpaths.密码, password)).finally(() => {
@@ -45,10 +44,10 @@ exports.amazonLogin = function (username, password) {
                     })
                 });
             }
-            return driver.wait(()=> {
+            return driver.wait(() => {
                 return driver.getTitle().then( title => {  //等待进入界面
                     // if(title.indexOf("主页") >= 0 || title.indexOf("Home") >= 0 || title.indexOf("两步") >= 0 || title.indexOf("Two") >= 0 )
-                    if(title.indexOf("登录") === -1 && title.indexOf("Sign") === -1) return title;
+                    if (title.indexOf('登录') === -1 && title.indexOf('Sign') === -1) return title;
                     else return false;
                 });
             }, 120 * 1000)
@@ -287,7 +286,7 @@ exports.quit = function () { if(driver !== undefined) driver.quit(); }
 let inputTxtByXpath = function (xpath, v) {
     return driver.findElements( By.xpath(xpath) ).then(doc => {
         if (doc.length !== 0) {
-            return driver.findElement(By.xpath(xpath)).getAttribute("value").then(value => {
+            return driver.findElement(By.xpath(xpath)).getAttribute('value').then(value => {
                 if (value === "") {
                     return driver.findElement(By.xpath(xpath)).sendKeys(v);
                 } else if (xpath === '//*[@id="carrierName_UNSHIPPEDITEMS"]') {
