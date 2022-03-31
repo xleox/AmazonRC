@@ -14,6 +14,7 @@ exports.amazonLogin = function (username, password) {
     let options = new chrome.Options();
     if (amazonHost === 'amazon.com') options.addArguments('user-data-dir=C:\\Chrome\\User Data\\');
     else options.addArguments('user-data-dir=C:\\Chrome\\' + amazonHost + '\\');
+    options.addArguments('--start-maximized');
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
     driver.get('http://sellercentral.' + amazonHost + '/gp/homepage.html/ref=xx_home_logo_xx');
@@ -131,13 +132,13 @@ exports.sendItems = async function (url, trackIDs) {
                 let addressLi = await driver.findElements(By.xpath('//*[@id="a-popover-1"]/div/div/ul/li'));
                 let addressIdx = addressLi.length - 1;
                 await sleep.msleep(1000);
-                await driver.findElement(By.xpath('//*[@id="dropdown1_' + addressIdx + '"]')).click();
+                await driver.findElement(By.xpath('//*[@id="BulkConfirmShipment-ShipFromDropdown_' + addressIdx + '"]')).click();
                 console.log('2 - 地址选择');
                 await sleep.msleep(1000);
                 await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
                 await sleep.msleep(1000);
                 if (trackIDs[0].selectName === '其他') {
-                    await driver.findElement(By.xpath('//*[@id="dropdown2_1"]')).click();
+                    await driver.findElement(By.xpath('//*[@id="CarrierListDropdown--1_1"]')).click();
                     await sleep.msleep(1000);
                     await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[3]/div[1]/span[2]/span/span')).click();
                 }
@@ -192,7 +193,7 @@ exports.sendItems = async function (url, trackIDs) {
                 await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click();
                 await sleep.msleep(1000);
                 if (trackIDs[0].selectName === '其他') {
-                    await driver.findElement(By.xpath('//*[@id="dropdown1_1"]')).click();
+                    await driver.findElement(By.xpath('//*[@id="CarrierListDropdown--1_1"]')).click();
                     await sleep.msleep(1000);
                     await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span'));
                 }
