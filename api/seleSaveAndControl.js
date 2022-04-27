@@ -190,15 +190,20 @@ exports.sendItems = async function (url, trackIDs) {
                 console.log('6 - 确认发货点击');
                 await sleep.msleep(3 * 1000);
             } else {
+                console.log('1 - 开始执行');
                 await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span')).click();
                 await sleep.msleep(1000);
                 if (trackIDs[0].selectName === '其他') {
+                    console.log('2 - 选择第一条物流');
                     await driver.findElement(By.xpath('//*[@id="CarrierListDropdown--1_1"]')).click();
-                    await sleep.msleep(1000);
-                    await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span/span'));
+                    await sleep.msleep(2 * 1000);
+                    console.log('3 - 再次点击承运人选择器');
+                    //*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]
+                    await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[1]/span[2]/span'));
                 }
                 await sleep.msleep(2 * 1000);
                 await driver.findElement(By.xpath('//a[contains(text(),"'+ trackIDs[0].selectName +'")]')).click();
+                console.log('3 - 选择承运人');
                 await sleep.msleep(2 * 1000);
                 if (trackIDs[0].selectName === '其他') {
                     await driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).clear();
@@ -206,6 +211,7 @@ exports.sendItems = async function (url, trackIDs) {
                     await driver.findElement(By.xpath('//*[@id="customCarrierInput--1"]')).sendKeys(trackIDs[0].companyName);
                     await sleep.msleep(2 * 1000);
                     await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[2]/input')).sendKeys(trackIDs[0].serviceContent);
+                    console.log('3 - 选择配送服务');
                 } else {
                     if (trackIDs[0].serviceSelect !== '其他') {
                         await driver.findElement(By.xpath('//*[@id="MYO-app"]/div/div[2]/div/div/div[2]/div/div/div[2]/div[2]/div/div[2]/div/span[1]/span/span')).click();
