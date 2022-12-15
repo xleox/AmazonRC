@@ -111,45 +111,50 @@ let getBaseInf = function () {
                         let v = '<verNumber>' + 版本.代号 + '</verNumber>';
                         let n = '<verName>' + 版本.名称 + '</verName>';
                         fs.writeFileSync('./public/homeAndOrderPage.txt',homeOrderCancelHtml + shippedOrderHtml + t + v + n);
-                        RcState = '读取已订单信息并保存';
-                        if (config['FBA'] && readMission.length === 0) {
-                            chrome.getInventoryPageHtml().then(InventoryHtml => {
-                                RcState = '读取FBA库存信息';
-                                let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
-                                let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
-                                    '&forceOrdersTableRefreshTrigger=false';
-
-                                chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
-                                    RcState = '读取FBA已取消订单信息';
-                                    let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
+                        // https://sellercentral.amazon.com/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false
+                        const shippedUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false`;
+                        chrome.getUrlHtml(shippedUrl).then(shippedJsonHtml => {
+                            fs.writeFileSync('./public/fbmShippedJsonHtml.txt', shippedJsonHtml);
+                            RcState = '读取已发货订单信息并保存';
+                            if (config['FBA'] && readMission.length === 0) {
+                                chrome.getInventoryPageHtml().then(InventoryHtml => {
+                                    RcState = '读取FBA库存信息';
+                                    let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
+                                    let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
                                         '&forceOrdersTableRefreshTrigger=false';
 
-                                    chrome.getUrlHtml(allUrl).then(allOrderHtml => {
-                                        RcState = '读取FBA所有订单信息';
-                                        let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
-                                        fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+                                    chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
+                                        RcState = '读取FBA已取消订单信息';
+                                        let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
+                                            '&forceOrdersTableRefreshTrigger=false';
+
+                                        chrome.getUrlHtml(allUrl).then(allOrderHtml => {
+                                            RcState = '读取FBA所有订单信息';
+                                            let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
+                                            fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+                                        })
                                     })
                                 })
-                            })
-                        }
-                        if (readMission.length > 0) {
-                            readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
-                                RcState = '完成第一个读取任务';
-                                readMission.splice(0,1);
-                                if (readMission.length > 0) {
-                                    return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
-                                        RcState = '完成第二个读取任务';
-                                        readMission.splice(0,1);
-                                        if (readMission.length > 0) {
-                                            return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
-                                                readMission.splice(0,1);
-                                                RcState = '完成第三个读取任务';
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
+                            }
+                            if (readMission.length > 0) {
+                                readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
+                                    RcState = '完成第一个读取任务';
+                                    readMission.splice(0,1);
+                                    if (readMission.length > 0) {
+                                        return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
+                                            RcState = '完成第二个读取任务';
+                                            readMission.splice(0,1);
+                                            if (readMission.length > 0) {
+                                                return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
+                                                    readMission.splice(0,1);
+                                                    RcState = '完成第三个读取任务';
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        })
                     });
                 })
             });
