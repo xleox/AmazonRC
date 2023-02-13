@@ -265,6 +265,14 @@ exports.uploadListing = function (url, filePath) {
             console.log("上传完成");
         })
     })
+};
+// 取款执行
+exports.clickWithdraw = async function (withdrawHtml) {
+    if (withdrawHtml.indexOf('disburse-now-button') > -1) {
+        await driver.findElement(By.xpath('//*[@id="root"]/div/div[2]/kat-button')).click();
+        sleep.msleep(5 * 1000);
+        return 'Success';
+    } else { return 'Failed' }
 }
 exports.switchSite = function (amzSite) {
     return driver.findElement(By.xpath('//*[@id="sc-mkt-picker-switcher-select"]')).click().then(()=>{

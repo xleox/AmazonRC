@@ -8,7 +8,7 @@ const sleep = require('sleep');
 const Promise = require('bluebird');
 const config = require('./setting').config;
 
-const 版本 = { '代号': '2.0.9.7', '名称': '牛刀' }
+const 版本 = { '代号': '2.0.9.8', '名称': '牛刀' };
 let RcState = '';
 let RcBusy = false;
 let merchantId = '';  // 用户在亚马逊的唯一标识之一 可以用来切换店铺
@@ -17,6 +17,7 @@ let amazonHost = 'amazon.com';
 if(config['站点'] !== undefined) amazonHost = config['站点'];
 let deliverMission = { url: '', items: [] };
 let uploadMission = { amzUrl: '', amzSite: '', listingUrl: '' };
+let withdrawMission = { amzUrl: '', amzSite: '' };
 let readMission = [];
 
 // 添加任务
@@ -60,6 +61,16 @@ router.post('/addUploadMission',(req,res) => {
     uploadMission.listingUrl = req.body.listingUrl;
     res.send('ok');
 });
+// 添加自动取款任务
+router.post('/addWithdrawMission', (req, res) => {
+    if (!req.body.amzUrl || !req.body.amzSite) {
+        res.send('格式错误！');
+        return;
+    }
+    withdrawMission.amzUrl = req.body.amzUrl;
+    withdrawMission.amzSite = req.body.amzSite;
+    res.send('OK');
+})
 router.get('/',(req,res) => {
     res.send('Amazon Control Sever Start');
 });
@@ -162,10 +173,13 @@ let getBaseInf = function () {
     });
 }
 // 启动先打开。。。。。。。。。。
+
 getBaseInf();
 setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
 setInterval(() => { sendItems() }, 4 * 60 * 1000);
-setInterval(() => { uploadListing() }, 30 * 60 * 1000);
+setInterval(() => { executeWithdraw(); }, 30 * 60 * 1000);
+// setInterval(() => { uploadListing() }, 30 * 60 * 1000);
+
 
 let sendItems = function () {
     if (RcBusy) return;
@@ -204,6 +218,103 @@ let sendItems = function () {
         chrome.sendItems(sendItemsUrl, plan2SendItems).then(() => {});
     });
 }
+// 执行自动取款任务
+let marketplaceID = {
+    'www.amazon.com': 'ATVPDKIKX0DER',
+    'www.amazon.ca': 'A2EUQ1WTGCTBG2',
+    'www.amazon.com.mx': 'A1AM78C64UM0Y8',
+    'www.amazon.co.jp': 'A1VC38T7YXB528',
+    'www.amazon.co.uk': 'A1F83G8C2ARO7P',
+    'www.amazon.de': 'A1PA6795UKMFR9',
+    'www.amazon.fr': 'A13V1IB3VIYZZH',
+    'www.amazon.it': 'APJ6JRA9NG5V4',
+    'www.amazon.es': 'A1RKKUPIHCS9HS',
+    'www.amazon.com.au': 'A39IBJ37TRP1C6'
+};
+let executeWithdraw = function () {
+    if (RcBusy) return;
+    if (withdrawMission.amzUrl === '' || withdrawMission.amzSite === '') return;
+    RcBusy = true;
+    setTimeout(() => { chrome.quit(); RcBusy = false; RcState = '空闲'; }, 150 * 1000);
+    RcState = '正在打开申请转账页面......';
+    chrome.amazonLogin(config['账户'], config['密码']).then(title => {
+        if (title.indexOf('两步') >= 0 || title.indexOf('Two') >= 0) {
+            RcState = '两步验证，需要协助登陆';
+            console.log('两步验证，需要协助登陆', title);
+            return title;
+        }
+        RcState = '登陆成功(申请转账)';
+        console.log('登陆成功(申请转账)', title);
+        chrome.getHomePageHtml().then(homeHtml => {
+            if(merchantId === '' || merchantId === '-') merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
+            marketplaceId = getTextByReg(homeHtml, /(?<=data-marketplace_selection=")(.*?)(?=")/g, 0);
+            if (marketplaceId !== '-') {
+                if (marketplaceID[withdrawMission.amzSite] !== marketplaceId) {
+                    if (merchantId !== '-') {
+                        return chrome.getUrlHtml('https://sellercentral.' + amazonHost + '/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=' + marketplaceID[withdrawMission.amzSite] +
+                            '&merchantId=' + merchantId);
+                    } else {
+                        console.log('merchantId: ' + merchantId + ' 匹配出错！！！');
+                        chrome.quit();
+                        withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
+                        return merchantId;
+                    }
+                } else return new Promise(function (resolve, reject) { resolve('"marketplaceId":"' + marketplaceId + '"'); });
+            } else {
+                console.log('marketplaceID: ' + marketplaceId + ' 匹配出错！！！');
+                chrome.quit(); RcBusy = false; withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
+                return marketplaceId;
+            }
+        }).then(result => {
+            // 再次验证 看是否已经跳转
+            if (marketplaceID[withdrawMission.amzSite] === getTextByReg(result, /(?<="marketplaceId":")(.*?)(?=")/g, 0)) {
+                RcState = '申请转账';
+                console.log('申请转账', title);
+                chrome.getUrlHtml(withdrawMission.amzUrl).then(withdrawHtml => {
+                    if (withdrawHtml.indexOf('ineligibility-alert-section') > -1) {
+                        chrome.quit(); RcBusy = false; withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
+                        console.log('该账号站点不支持取款');
+                        return marketplaceId;
+                    } else {
+                        let datetime = moment().format('YYYY-MM-DD HH:mm:ss');
+                        let today = moment().format('YYYY-MM-DD');
+                        chrome.clickWithdraw(withdrawHtml).then(clickResult => {
+                            console.log('执行结果：', clickResult)
+                            if (clickResult === 'Success') {
+                                let withdrawAmount = withdrawHtml.match(/(?<=class="settlement-amount-balance">)(.*?)(?=<\/div>)/g);
+                                let transferAmount = '';
+                                if (withdrawAmount !== null) transferAmount = withdrawAmount[0];
+                                else transferAmount = '-';
+                                let options = { flag: 'a+' };
+                                let saveInfo = '{"转账时间": "' + datetime + '", "转账站点": "' + uploadMission.amzSite + '", "转账金额": "' + transferAmount + '"}\n';
+                                fs.writeFileSync(`./public/withdraw_${today}.txt`, saveInfo, options);
+                                withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
+                                chrome.quit(); RcBusy = false;
+                                return new Promise(function(resolve, reject) { resolve('done'); });
+                            } else {
+                                chrome.quit(); RcBusy = false;
+                                withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
+                            }
+                        });
+                    }
+                });
+            } else {
+                chrome.quit(); RcBusy = false;
+                withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
+                console.log('marketplaceID: ' + marketplaceId + ' 匹配出错！！！');
+                return marketplaceId;
+            }
+        }).catch(error => {
+            chrome.quit(); RcBusy = false; RcState = '申请转账 出错';
+            withdrawMission.amzUrl = ''; withdrawMission.amzSite = ''; console.log('申请转账 出错: ' , error.message);
+        });
+    }).catch(error => {
+        chrome.quit(); RcBusy = false; RcState = '申请转账 出错';
+        withdrawMission.amzUrl = ''; withdrawMission.amzSite = ''; console.log('申请转账 出错: ' , error.message);
+    });
+};
+
+// 执行上传产品任务
 let uploadListing = function () {
     if (RcBusy) return;
     if (uploadMission.amzUrl === '' || uploadMission.listingUrl === '' ) return;
@@ -221,9 +332,7 @@ let uploadListing = function () {
         'www.amazon.es': 'A1RKKUPIHCS9HS',
         'www.amazon.com.au': 'A39IBJ37TRP1C6'
     }
-    /**
-     * 下载文件
-     **/
+    // 下载文件
     let listingName = moment().format('YYYY-MM-DD_hh-mm-ss') + '.xls';
     let listingPath = __dirname.replace('api', 'public\\' + listingName);
     RcState = '开始下载listing(上传产品)';
@@ -299,6 +408,7 @@ let uploadListing = function () {
         }
     }))
 };
+/**/
 router.get('/quit',(req,res) => {
     chrome.quit();
     res.send('quit');
@@ -347,7 +457,7 @@ router.post('/sendItem',(req,res) => {
     } else res.send('check please');
 });
 router.get('/state',(req,res) => {
-    res.send({ 'busy': RcBusy, 'state': RcState, 'delivery': deliverMission, 'readMission': readMission , 'uploadMission': uploadMission });
+    res.send({ 'busy': RcBusy, 'state': RcState, 'delivery': deliverMission, readMission , uploadMission, withdrawMission });
 });
 function download (url, dest, cb) {
     let file = fs.createWriteStream(dest);
@@ -374,4 +484,5 @@ let getTextByReg = function (text, reg, i) {
         if(regMatch[i] !== undefined) return regMatch[i];
     return '-'
 };
+
 module.exports = router;
