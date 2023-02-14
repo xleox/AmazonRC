@@ -286,7 +286,7 @@ let executeWithdraw = function () {
                                 if (withdrawAmount !== null) transferAmount = withdrawAmount[0];
                                 else transferAmount = '-';
                                 let options = { flag: 'a+' };
-                                let saveInfo = '{"转账时间": "' + datetime + '", "转账站点": "' + uploadMission.amzSite + '", "转账金额": "' + transferAmount + '"}\n';
+                                let saveInfo = '{"转账时间": "' + datetime + '", "转账站点": "' + withdrawMission.amzSite + '", "转账金额": "' + transferAmount + '"}\n';
                                 fs.writeFileSync(`./public/withdraw_${today}.txt`, saveInfo, options);
                                 withdrawMission.amzUrl = ''; withdrawMission.amzSite = '';
                                 chrome.quit(); RcBusy = false;
