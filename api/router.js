@@ -7,12 +7,13 @@ const fs = require('fs');
 const sleep = require('sleep');
 const Promise = require('bluebird');
 const config = require('./setting').config;
-
-const 版本 = { '代号': '2.0.9.9', '名称': '牛刀' };
+const 版本 = { '代号': '2.0.1.0', '名称': '牛刀' };
 let RcState = '';
 let RcBusy = false;
-let merchantId = '';  // 用户在亚马逊的唯一标识之一 可以用来切换店铺
-let marketplaceId = '';  // 店铺ID
+// 用户在亚马逊的唯一标识之一 可以用来切换店铺
+let merchantId = '';
+// 店铺ID
+let marketplaceId = '';
 let amazonHost = 'amazon.com';
 if(config['站点'] !== undefined) amazonHost = config['站点'];
 let deliverMission = { url: '', items: [] };
@@ -128,24 +129,48 @@ let getBaseInf = function () {
                             fs.writeFileSync('./public/fbmShippedJsonHtml.txt', shippedJsonHtml);
                             RcState = '读取已发货订单信息并保存';
                             if (config['FBA'] && readMission.length === 0) {
-                                chrome.getInventoryPageHtml().then(InventoryHtml => {
-                                    RcState = '读取FBA库存信息';
-                                    let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
-                                    let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
-                                        '&forceOrdersTableRefreshTrigger=false';
-
-                                    chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
-                                        RcState = '读取FBA已取消订单信息';
-                                        let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
-                                            '&forceOrdersTableRefreshTrigger=false';
-
-                                        chrome.getUrlHtml(allUrl).then(allOrderHtml => {
-                                            RcState = '读取FBA所有订单信息';
-                                            let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
-                                            fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+                                // https://sellercentral.amazon.co.uk/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnqinv_dnav_xx?tbla_myitable=sort:%7B%22sortOrder%22%3A%22DESCENDING%22%2C%22sortedColumnId%22%3A%22date%22%7D;search:;pagination:1;
+                                sleep.msleep(5 * 1000);
+                                if (config['站点'] === 'amazon.co.uk') {
+                                    console.log('欧洲站：跳转到德国站');
+                                    chrome.getUrlHtml(`https://sellercentral.${amazonHost}/home`).then(homeHtml => {
+                                        chrome.getUrlHtml(`https://sellercentral.amazon.co.uk/home?mons_sel_dir_mcid=amzn1.merchant.d.ACOWJDIYY6KQJXSQ6VDQXNU2NZLQ&mons_sel_mkid=A1PA6795UKMFR9&mons_sel_dir_paid=amzn1.pa.d.ABPHZBIGFVIIV4QIYGFPIP63ASMQ&ignore_selection_changed=true`).then(html_2 => {
+                                            chrome.getInventoryPageHtml().then(InventoryHtml => {
+                                                RcState = '读取FBA库存信息';
+                                                let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
+                                                let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
+                                                        '&forceOrdersTableRefreshTrigger=false';
+                                                chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
+                                                    RcState = '读取FBA已取消订单信息';
+                                                    let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
+                                                            '&forceOrdersTableRefreshTrigger=false';
+                                                    chrome.getUrlHtml(allUrl).then(allOrderHtml => {
+                                                        RcState = '读取FBA所有订单信息';
+                                                        let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
+                                                        fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+                                                    })
+                                                })
+                                            })
+                                        });
+                                    })
+                                } else {
+                                    chrome.getInventoryPageHtml().then(InventoryHtml => {
+                                        RcState = '读取FBA库存信息';
+                                        let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
+                                        let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
+                                                '&forceOrdersTableRefreshTrigger=false';
+                                        chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
+                                            RcState = '读取FBA已取消订单信息';
+                                            let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
+                                                    '&forceOrdersTableRefreshTrigger=false';
+                                            chrome.getUrlHtml(allUrl).then(allOrderHtml => {
+                                                RcState = '读取FBA所有订单信息';
+                                                let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
+                                                fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+                                            })
                                         })
                                     })
-                                })
+                                }
                             }
                             if (readMission.length > 0) {
                                 readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {

@@ -17,7 +17,8 @@ exports.amazonLogin = function (username, password) {
     options.addArguments('--start-maximized');
     driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).setChromeOptions(options).build();
     driver.manage().window().maximize();
-    driver.get('http://sellercentral.' + amazonHost + '/gp/homepage.html/ref=xx_home_logo_xx');
+    driver.get('https://sellercentral.' + amazonHost + '/gp/homepage.html/ref=xx_home_logo_xx');
+    // https://sellercentral.amazon.co.uk/gp/homepage.html/ref=xx_home_logo_xx
     return driver.wait(() => {
         return driver.getTitle().then( title => {  //等待进入界面
             if (title.indexOf('Amazon') >= 0 || title.indexOf('亚马逊') >= 0) return title;
@@ -111,7 +112,7 @@ exports.getInventoryPageHtml = function () {
     driver.manage().window().maximize();
     // https://sellercentral.amazon.com/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx
     return driver.get("https://sellercentral." + amazonHost + "/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx").then(() => {
-        sleep.msleep(15*1000);
+        sleep.msleep(15 * 1000);
         return driver.getPageSource();
     });
 };
@@ -176,7 +177,7 @@ exports.sendItems = async function (url, trackIDs) {
                 await sleep.msleep(5 * 1000);
                 let sendMission = [];
                 for (let i = 0; i < trackIDs.length; i++) {
-                    sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "' + trackIDs[i].orderID + '")]/td[6]/span/input', trackIDs[i].trackID));
+                    sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "' + trackIDs[i].orderID + '")]/td[7]/span/input', trackIDs[i].trackID));
                 }
                 await Promise.all(sendMission);
                 console.log('5 - 填写发货编号');
@@ -232,7 +233,7 @@ exports.sendItems = async function (url, trackIDs) {
                 await sleep.msleep(5 * 1000);
                 let sendMission = [];
                 for (let i=0; i < trackIDs.length; i++) {
-                    sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "' + trackIDs[i].orderID + '")]/td[6]/span/input', trackIDs[i].trackID));
+                    sendMission.push(inputTxtByXpath('//*[@id="bulk-confirm-orders-table"]/tbody/tr[contains(string(), "' + trackIDs[i].orderID + '")]/td[7]/span/input', trackIDs[i].trackID));
                 }
                 await Promise.all(sendMission);
                 await sleep.msleep(10 * 1000);
