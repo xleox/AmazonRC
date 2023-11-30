@@ -8,6 +8,7 @@ const path = require('path');
 const ejs = require('ejs');
 // const socks5 = require('simple-socks');
 const router = require('./api/router');
+const { config: { whitelist } } = require('./api/whitelist');
 
 let PORT = 666;
 const config = require('./api/setting').config;
@@ -16,12 +17,9 @@ if(config.站点 !== undefined) PORT = 777;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// IP地址白名单
-const whitelist = ['124.221.121.128', '111.18.38.179'];
 // 中间件：检查IP地址
 const checkIPMiddleware = (req, res, next) => {
     const clientIP = req.ip || req.connection.remoteAddress;
-    // console.log(clientIP)
     if (whitelist.includes(clientIP)) {
         next(); // 允许访问
     } else {
@@ -45,7 +43,7 @@ app.set('view engine', 'ejs');
 // };
 // const server = socks5.createServer(options);
 
-app.use(router);
+// app.use(router);
 
 app.listen(PORT,'0.0.0.0', function () {
     console.log('RC Server At Port', PORT);
