@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const router = express.Router();
 const chrome = require('./seleSaveAndControl');
@@ -7,7 +8,7 @@ const fs = require('fs');
 const sleep = require('sleep');
 const Promise = require('bluebird');
 const config = require('./setting').config;
-const 版本 = { '代号': '2.0.1.0', '名称': '牛刀' };
+const 版本 = { '代号': '2.0.1.1', '名称': '牛刀' };
 let RcState = '';
 let RcBusy = false;
 // 用户在亚马逊的唯一标识之一 可以用来切换店铺
@@ -15,12 +16,15 @@ let merchantId = '';
 // 店铺ID
 let marketplaceId = '';
 let amazonHost = 'amazon.com';
-if(config['站点'] !== undefined) amazonHost = config['站点'];
+if (config['站点'] !== undefined) amazonHost = config['站点'];
 let deliverMission = { url: '', items: [] };
 let uploadMission = { amzUrl: '', amzSite: '', listingUrl: '' };
 let withdrawMission = { amzUrl: '', amzSite: '' };
 let readMission = [];
 
+router.get('/',(req,res) => {
+    res.send('Amazon Control Sever Start');
+});
 // 添加任务
 let addReadMission = function (url, saveFile) {
     for (let i = 0; i < readMission.length; i++) {
@@ -29,7 +33,6 @@ let addReadMission = function (url, saveFile) {
     readMission.push({url: url, saveFile: saveFile});
     return '添加成功';
 };
-
 let readUrlThenSave = function (url, saveFile) {
     return chrome.getUrlHtml(url).then(html => {
         fs.writeFileSync('./public/' + saveFile + '.txt', html);
@@ -72,9 +75,6 @@ router.post('/addWithdrawMission', (req, res) => {
     withdrawMission.amzSite = req.body.amzSite;
     res.send('OK');
 })
-router.get('/',(req,res) => {
-    res.send('Amazon Control Sever Start');
-});
 router.get('/readMission',(req,res) => {
     res.send(readMission);
 });
@@ -161,7 +161,7 @@ let getBaseInf = function () {
                                                 '&forceOrdersTableRefreshTrigger=false';
                                         chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
                                             RcState = '读取FBA已取消订单信息';
-                                            let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
+                                            let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=950&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
                                                     '&forceOrdersTableRefreshTrigger=false';
                                             chrome.getUrlHtml(allUrl).then(allOrderHtml => {
                                                 RcState = '读取FBA所有订单信息';
@@ -198,13 +198,11 @@ let getBaseInf = function () {
     });
 }
 // 启动先打开。。。。。。。。。。
-
 getBaseInf();
 setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
 setInterval(() => { sendItems() }, 4 * 60 * 1000);
 setInterval(() => { executeWithdraw(); }, 30 * 60 * 1000);
 // setInterval(() => { uploadListing() }, 30 * 60 * 1000);
-
 
 let sendItems = function () {
     if (RcBusy) return;
@@ -338,7 +336,6 @@ let executeWithdraw = function () {
         withdrawMission.amzUrl = ''; withdrawMission.amzSite = ''; console.log('申请转账 出错: ' , error.message);
     });
 };
-
 // 执行上传产品任务
 let uploadListing = function () {
     if (RcBusy) return;
