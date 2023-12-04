@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 const express = require('express');
 const app = express();
 const Promise = require("bluebird");
@@ -23,12 +23,11 @@ const checkIPMiddleware = (req, res, next) => {
     if (whitelist.includes(clientIP)) {
         next(); // 允许访问
     } else {
-        res.status(403).send('Forbidden'); // 拒绝访问
+        res.status(403).send('Welcome to visit!'); // 拒绝访问
     }
 };
 // 使用中间件，确保在静态资源中间件之前
 app.use(checkIPMiddleware);
-
 app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'public'));
 app.set('view engine', 'ejs');
@@ -43,7 +42,7 @@ app.set('view engine', 'ejs');
 // };
 // const server = socks5.createServer(options);
 
-// app.use(router);
+app.use(router);
 
 app.listen(PORT,'0.0.0.0', function () {
     console.log('RC Server At Port', PORT);
