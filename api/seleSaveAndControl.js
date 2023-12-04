@@ -108,13 +108,13 @@ exports.getOrderCancelPageHtml = function () {
         });
     });
 }
-exports.getInventoryPageHtml = function () {
-    driver.manage().window().maximize();
-    // https://sellercentral.amazon.com/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx
-    return driver.get("https://sellercentral." + amazonHost + "/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx").then(() => {
-        sleep.msleep(15 * 1000);
-        return driver.getPageSource();
-    });
+// 打开加载FBA库存页面
+exports.getInventoryPageHtml = async function () {
+    await driver.manage().window().maximize();
+    const stockUrl = `https://sellercentral.${amazonHost}/inventoryplanning/manageinventoryhealth?ref_=xx_invplan_dnav_xx`;
+    await driver.get(stockUrl);
+    sleep.msleep(15 * 1000);
+    return await driver.getPageSource();
 };
 exports.sendItems = async function (url, trackIDs) {
     // await driver.manage().window().setRect({x: 0, y: 0, width: 1920, height: 969});

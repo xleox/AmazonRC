@@ -8,7 +8,7 @@ const fs = require('fs');
 const sleep = require('sleep');
 const Promise = require('bluebird');
 const config = require('./setting').config;
-const 版本 = { '代号': '2.0.1.1', '名称': '牛刀' };
+const 版本 = { '代号': '2.0.1.2', '名称': '牛刀' };
 let RcState = '';
 let RcBusy = false;
 // 用户在亚马逊的唯一标识之一 可以用来切换店铺
@@ -78,12 +78,14 @@ router.post('/addWithdrawMission', (req, res) => {
 router.get('/readMission',(req,res) => {
     res.send(readMission);
 });
-let getBaseInf = function () {
+// 监控启动程序
+let getBaseInf = async function () {
     if (RcBusy) return;
     RcBusy = true;
     setTimeout(() => { chrome.quit(); RcBusy = false; RcState = '空闲'; },6 * 60 * 1000);
     RcState = '正在打开页面';
-    chrome.amazonLogin(config.账户, config.密码).then(title => {
+    try {
+        const title = await chrome.amazonLogin(config.账户, config.密码);
         if (title.indexOf('两步') >= 0 || title.indexOf('Two') >= 0 ) {
             RcState = '两步验证，需要协助登陆';
             console.log('两步验证，需要协助登陆' , title);
@@ -92,111 +94,68 @@ let getBaseInf = function () {
         RcState = '登陆成功';
         console.log('登陆成功', title);
         sleep.msleep(6 * 1000);
-        chrome.getHomePageHtml().then(homeHtml => {
-            RcState = '读取首页信息';
-            if (merchantId === '' || merchantId === '-') {
-                merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
+        let homeHtml = await chrome.getHomePageHtml();
+        RcState = '读取首页信息';
+        if (merchantId === '' || merchantId === '-') {
+            merchantId = getTextByReg(homeHtml, /(?<=data-merchant_selection="amzn1.merchant.o.)(.*?)(?=")/g, 0);
+        }
+        marketplaceId = getTextByReg(homeHtml, /(?<="marketplaceId":")(.*?)(?=")/g, 0);
+        if (amazonHost === 'amazon.com' && marketplaceId !== 'ATVPDKIKX0DER') {
+            console.log('美国店铺首页不是美国站，正在跳转');
+            RcState = '美国店铺首页不是美国站，正在跳转';
+            homeHtml = await chrome.getUrlHtml(`https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=ATVPDKIKX0DER&merchantId=${merchantId}`);
+        }
+        if (amazonHost === 'amazon.co.uk' && marketplaceId !== 'A1F83G8C2ARO7P') {
+            console.log('欧洲店铺首页不是英国站，正在跳转');
+            RcState = '欧洲店铺首页不是英国站，正在跳转';
+            homeHtml = await chrome.getUrlHtml(`https://sellercentral.amazon.co.uk/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=${merchantId}`);
+        }
+        const orderHtml = await chrome.getOrderPageHtml();
+        RcState = '读取未发货信息';
+        const homeOrderHtml = homeHtml + orderHtml;
+        const cancelHtml = await chrome.getOrderCancelPageHtml();
+        RcState = '读取已取消信息';
+        const homeOrderCancelHtml = homeOrderHtml + cancelHtml;
+        const shippedOrderHtml = await chrome.getOrderShippedPageHtml();
+        let t = '<chinaTime>' + moment().format('YYYY-MM-DD HH:mm:ss') + '</chinaTime>';
+        let v = '<verNumber>' + 版本.代号 + '</verNumber>';
+        let n = '<verName>' + 版本.名称 + '</verName>';
+        fs.writeFileSync('./public/homeAndOrderPage.txt', homeOrderCancelHtml + shippedOrderHtml + t + v + n);
+        // https://sellercentral.amazon.com/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false
+        const shippedUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false`;
+        const shippedJsonHtml = await chrome.getUrlHtml(shippedUrl);
+        fs.writeFileSync('./public/fbmShippedJsonHtml.txt', shippedJsonHtml);
+        RcState = '读取已发货订单信息并保存';
+        if (config['FBA'] && readMission.length === 0) {
+            sleep.msleep(5 * 1000);
+            const canceledUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled&forceOrdersTableRefreshTrigger=false`;
+            const allUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all&forceOrdersTableRefreshTrigger=false`;
+            if (config['站点'] === 'amazon.co.uk') {
+                console.log('欧洲站：跳转到德国站');
+                await chrome.getUrlHtml(`https://sellercentral.${amazonHost}/home`);
+                const ukHomeUrl = `https://sellercentral.amazon.co.uk/home?mons_sel_dir_mcid=amzn1.merchant.d.ACOWJDIYY6KQJXSQ6VDQXNU2NZLQ&mons_sel_mkid=A1PA6795UKMFR9&mons_sel_dir_paid=amzn1.pa.d.ABPHZBIGFVIIV4QIYGFPIP63ASMQ&ignore_selection_changed=true`;
+                await chrome.getUrlHtml(ukHomeUrl);
             }
-            marketplaceId = getTextByReg(homeHtml, /(?<="marketplaceId":")(.*?)(?=")/g, 0);
-            if (amazonHost === 'amazon.com' && marketplaceId !== 'ATVPDKIKX0DER') {
-                console.log('美国店铺首页不是美国站，正在跳转');
-                RcState = '美国店铺首页不是美国站，正在跳转';
-                return chrome.getUrlHtml('https://sellercentral.amazon.com/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FNA&marketplaceId=ATVPDKIKX0DER&merchantId=' + merchantId);
-            }
-            if (amazonHost === 'amazon.co.uk' && marketplaceId !== 'A1F83G8C2ARO7P') {
-                console.log('欧洲店铺首页不是英国站，正在跳转');
-                RcState = '欧洲店铺首页不是英国站，正在跳转';
-                return chrome.getUrlHtml('https://sellercentral.amazon.co.uk/merchant-picker/change-merchant?url=%2Fhome%3Fcor%3Dmmd%5FEU&marketplaceId=A1F83G8C2ARO7P&merchantId=' + merchantId);
-            }
-            return new Promise(function(resolve, reject){ resolve(homeHtml); });
-        }).then(homeHtml => {
-            chrome.getOrderPageHtml().then(orderHtml => {
-                RcState = '读取未发货信息';
-                return new Promise(function(resolve, reject){ resolve(homeHtml + orderHtml); });
-            }).then(homeOrderHtml => {
-                chrome.getOrderCancelPageHtml().then(cancelHtml => {
-                    RcState = '读取已取消信息';
-                    return new Promise(function(resolve, reject){ resolve(homeOrderHtml + cancelHtml); });
-                }).then(homeOrderCancelHtml => {
-                    chrome.getOrderShippedPageHtml().then(shippedOrderHtml => {
-                        let t = '<chinaTime>' + moment().format('YYYY-MM-DD HH:mm:ss') + '</chinaTime>';
-                        let v = '<verNumber>' + 版本.代号 + '</verNumber>';
-                        let n = '<verName>' + 版本.名称 + '</verName>';
-                        fs.writeFileSync('./public/homeAndOrderPage.txt',homeOrderCancelHtml + shippedOrderHtml + t + v + n);
-                        // https://sellercentral.amazon.com/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false
-                        const shippedUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false`;
-                        chrome.getUrlHtml(shippedUrl).then(shippedJsonHtml => {
-                            fs.writeFileSync('./public/fbmShippedJsonHtml.txt', shippedJsonHtml);
-                            RcState = '读取已发货订单信息并保存';
-                            if (config['FBA'] && readMission.length === 0) {
-                                // https://sellercentral.amazon.co.uk/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnqinv_dnav_xx?tbla_myitable=sort:%7B%22sortOrder%22%3A%22DESCENDING%22%2C%22sortedColumnId%22%3A%22date%22%7D;search:;pagination:1;
-                                sleep.msleep(5 * 1000);
-                                if (config['站点'] === 'amazon.co.uk') {
-                                    console.log('欧洲站：跳转到德国站');
-                                    chrome.getUrlHtml(`https://sellercentral.${amazonHost}/home`).then(homeHtml => {
-                                        chrome.getUrlHtml(`https://sellercentral.amazon.co.uk/home?mons_sel_dir_mcid=amzn1.merchant.d.ACOWJDIYY6KQJXSQ6VDQXNU2NZLQ&mons_sel_mkid=A1PA6795UKMFR9&mons_sel_dir_paid=amzn1.pa.d.ABPHZBIGFVIIV4QIYGFPIP63ASMQ&ignore_selection_changed=true`).then(html_2 => {
-                                            chrome.getInventoryPageHtml().then(InventoryHtml => {
-                                                RcState = '读取FBA库存信息';
-                                                let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
-                                                let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
-                                                        '&forceOrdersTableRefreshTrigger=false';
-                                                chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
-                                                    RcState = '读取FBA已取消订单信息';
-                                                    let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
-                                                            '&forceOrdersTableRefreshTrigger=false';
-                                                    chrome.getUrlHtml(allUrl).then(allOrderHtml => {
-                                                        RcState = '读取FBA所有订单信息';
-                                                        let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
-                                                        fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
-                                                    })
-                                                })
-                                            })
-                                        });
-                                    })
-                                } else {
-                                    chrome.getInventoryPageHtml().then(InventoryHtml => {
-                                        RcState = '读取FBA库存信息';
-                                        let inventoryStr = InventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
-                                        let canceledUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=500&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=canceled' +
-                                                '&forceOrdersTableRefreshTrigger=false';
-                                        chrome.getUrlHtml(canceledUrl).then(canceledHtml => {
-                                            RcState = '读取FBA已取消订单信息';
-                                            let allUrl = 'https://sellercentral.' + amazonHost + '/orders-api/search?limit=950&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=fba&orderStatus=all' +
-                                                    '&forceOrdersTableRefreshTrigger=false';
-                                            chrome.getUrlHtml(allUrl).then(allOrderHtml => {
-                                                RcState = '读取FBA所有订单信息';
-                                                let fbaOrderHtml = '<inventory>' + inventoryStr + '</inventory><allOrder>' + allOrderHtml + '</allOrder><canceledOrder>' + canceledHtml + '</canceledOrder>' + t;
-                                                fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
-                                            })
-                                        })
-                                    })
-                                }
-                            }
-                            if (readMission.length > 0) {
-                                readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
-                                    RcState = '完成第一个读取任务';
-                                    readMission.splice(0,1);
-                                    if (readMission.length > 0) {
-                                        return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
-                                            RcState = '完成第二个读取任务';
-                                            readMission.splice(0,1);
-                                            if (readMission.length > 0) {
-                                                return readUrlThenSave(readMission[0].url, readMission[0].saveFile).then(() => {
-                                                    readMission.splice(0,1);
-                                                    RcState = '完成第三个读取任务';
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        })
-                    });
-                })
-            });
-        }).catch(err => { chrome.quit(); console.log('登陆错误' , err); RcState = '登陆错误'; RcBusy = false; });
-    });
-}
+            const inventoryHtml = await chrome.getInventoryPageHtml();
+            RcState = '读取FBA库存信息';
+            const inventoryStr = inventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
+            const canceledHtml = await chrome.getUrlHtml(canceledUrl);
+            RcState = '读取FBA已取消订单信息';
+            const allOrderHtml = await chrome.getUrlHtml(allUrl);
+            RcState = '读取FBA所有订单信息';
+            const fbaOrderHtml = `<inventory>${inventoryStr}</inventory><allOrder>${allOrderHtml}</allOrder><canceledOrder>${canceledHtml}</canceledOrder>${t}`;
+            fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+        }
+        while (readMission.length) {
+            await readUrlThenSave(readMission[0].url, readMission[0].saveFile);
+            RcState = `完成 ${RcState} 读取任务`;
+            readMission.splice(0,1);
+        }
+    } catch (e) {
+        chrome.quit(); console.log('登陆错误' , err); RcState = '登陆错误'; RcBusy = false;
+    }
+};
+
 // 启动先打开。。。。。。。。。。
 getBaseInf();
 setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
