@@ -111,9 +111,10 @@ exports.getOrderCancelPageHtml = function () {
 // 打开加载FBA库存页面
 exports.getInventoryPageHtml = async function () {
     await driver.manage().window().maximize();
-    const stockUrl = `https://sellercentral.${amazonHost}/inventoryplanning/manageinventoryhealth?ref_=xx_invplan_dnav_xx`;
+    // https://sellercentral.amazon.com/inventoryplanning/manageinventoryhealth?sort_column=available&sort_direction=desc&sort_age_bucket=&sort_column_sub=
+    const stockUrl = `https://sellercentral.${amazonHost}/inventoryplanning/manageinventoryhealth?sort_column=available&sort_direction=desc&sort_age_bucket=&sort_column_sub=`;
     await driver.get(stockUrl);
-    sleep.msleep(15 * 1000);
+    sleep.msleep(20 * 1000);
     return await driver.getPageSource();
 };
 exports.sendItems = async function (url, trackIDs) {
