@@ -122,9 +122,11 @@ let getBaseInf = async function () {
         let n = '<verName>' + 版本.名称 + '</verName>';
         fs.writeFileSync('./public/homeAndOrderPage.txt', homeOrderCancelHtml + shippedOrderHtml + t + v + n);
         // https://sellercentral.amazon.com/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false
-        const shippedUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false`;
-        const shippedJsonHtml = await chrome.getUrlHtml(shippedUrl);
-        fs.writeFileSync('./public/fbmShippedJsonHtml.txt', shippedJsonHtml);
+        if (amazonHost !== 'amazon.co.jp') {
+            const shippedUrl = `https://sellercentral.${amazonHost}/orders-api/search?limit=1000&offset=0&sort=order_date_desc&date-range=last-30&fulfillmentType=mfn&orderStatus=shipped&forceOrdersTableRefreshTrigger=false`;
+            const shippedJsonHtml = await chrome.getUrlHtml(shippedUrl);
+            fs.writeFileSync('./public/fbmShippedJsonHtml.txt', shippedJsonHtml);
+        }
         RcState = '读取已发货订单信息并保存';
         if (config['FBA'] && readMission.length === 0) {
             sleep.msleep(5 * 1000);
@@ -136,7 +138,8 @@ let getBaseInf = async function () {
                 const ukHomeUrl = `https://sellercentral.amazon.co.uk/home?mons_sel_dir_mcid=amzn1.merchant.d.ACOWJDIYY6KQJXSQ6VDQXNU2NZLQ&mons_sel_mkid=A1PA6795UKMFR9&mons_sel_dir_paid=amzn1.pa.d.ABPHZBIGFVIIV4QIYGFPIP63ASMQ&ignore_selection_changed=true`;
                 await chrome.getUrlHtml(ukHomeUrl);
             }
-            const inventoryHtml = await chrome.getInventoryPageHtml();
+            const oldInventoryUrl = `https://sellercentral.${amazonHost}/hz/inventory/view/FBAKNIGHTS/ref=xx_fbamnginv_dnav_xx`
+            const inventoryHtml = await chrome.getInventoryPageHtml(oldInventoryUrl);
             RcState = '读取FBA库存信息';
             const inventoryStr = inventoryHtml.replace(/\n|\r|\t|\s{2,}/g, '').replace(/<script.*?<\/script>/g, '');
             const canceledHtml = await chrome.getUrlHtml(canceledUrl);
@@ -145,20 +148,25 @@ let getBaseInf = async function () {
             RcState = '读取FBA所有订单信息';
             const fbaOrderHtml = `<inventory>${inventoryStr}</inventory><allOrder>${allOrderHtml}</allOrder><canceledOrder>${canceledHtml}</canceledOrder>${t}`;
             fs.writeFileSync('./public/fbaOrderHtml.txt', fbaOrderHtml);
+            // 读新库存页面，测试中程序
+            // const newInventoryUrl = `https://sellercentral.${amazonHost}/inventoryplanning/manageinventoryhealth?sort_column=available&sort_direction=desc&sort_age_bucket=&sort_column_sub=`;
+            // const newInventoryHtml = await chrome.getInventoryPageHtml(newInventoryUrl);
+            // fs.writeFileSync('./public/fbaInventoryHtml.txt', newInventoryHtml);
         }
         while (readMission.length) {
             await readUrlThenSave(readMission[0].url, readMission[0].saveFile);
             RcState = `完成 ${RcState} 读取任务`;
             readMission.splice(0,1);
         }
+        return true;
     } catch (e) {
-        chrome.quit(); console.log('登陆错误' , err); RcState = '登陆错误'; RcBusy = false;
+        console.log('登陆错误' , e); RcState = '登陆错误'; RcBusy = false; /* chrome.quit(); */
     }
 };
 
 // 启动先打开。。。。。。。。。。
-getBaseInf();
-setInterval(() => { getBaseInf() }, 15 * 60 * 1000);
+getBaseInf().catch((error) => { console.error(error); });
+setInterval(() => { getBaseInf().catch((error) => { console.error(error); }); }, 15 * 60 * 1000);
 setInterval(() => { sendItems() }, 4 * 60 * 1000);
 setInterval(() => { executeWithdraw(); }, 30 * 60 * 1000);
 // setInterval(() => { uploadListing() }, 30 * 60 * 1000);

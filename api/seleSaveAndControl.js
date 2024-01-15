@@ -1,3 +1,4 @@
+'use strict';
 const sleep = require('sleep');
 const webdriver = require('selenium-webdriver'),
     By = webdriver.By,
@@ -109,12 +110,20 @@ exports.getOrderCancelPageHtml = function () {
     });
 }
 // 打开加载FBA库存页面
-exports.getInventoryPageHtml = async function () {
+exports.getInventoryPageHtml = async function (pageUrl) {
     await driver.manage().window().maximize();
     // https://sellercentral.amazon.com/inventoryplanning/manageinventoryhealth?sort_column=available&sort_direction=desc&sort_age_bucket=&sort_column_sub=
-    const stockUrl = `https://sellercentral.${amazonHost}/inventoryplanning/manageinventoryhealth?sort_column=available&sort_direction=desc&sort_age_bucket=&sort_column_sub=`;
-    await driver.get(stockUrl);
+    // const stockUrl = `https://sellercentral.${amazonHost}/inventoryplanning/manageinventoryhealth?sort_column=available&sort_direction=desc&sort_age_bucket=&sort_column_sub=`;
+    await driver.get(pageUrl);
     sleep.msleep(20 * 1000);
+    // const hasScrollbar = document.body.scrollHeight > window.innerHeight;
+    // if (hasScrollbar) {
+    //     console.log('页面滚动')
+    //     const element = driver.findElement(By.xpath, '//*[@id="sc-content-container"]');
+    //     // scrollIntoView() 默认页面滚动到元素的顶部。传递false作为参数给scrollIntoView，滚动到元素的底部。
+    //     await driver.executeScript("arguments[0].scrollIntoView(false);", element);
+    //     sleep.msleep(5 * 1000);
+    // }
     return await driver.getPageSource();
 };
 exports.sendItems = async function (url, trackIDs) {
